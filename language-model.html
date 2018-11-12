@@ -5,7 +5,7 @@ subtitle: Here you can automatically generate text from a previously trained Neu
 
 use-site-title: true
 ---
-
+<script src="https://cdn.jsdelivr.net/npm/typeit@5.10.7/dist/typeit.min.js"></script>
 
 <div class="container" role="main">
   <div class="row">
@@ -16,9 +16,16 @@ use-site-title: true
           <div class="double-bounce1"></div>
           <div class="double-bounce2"></div>
         </div>
-        <p id="text-field" style="display:none">
-          My text
+        <p>
+          <br/>
         </p>
+        <span class="type-it"></span>
+        <!-- <div id="text-field" class="type-it" style="display:none">
+            <h4> </h4>
+        </div> -->
+        <!-- <p id="text-field" style="display:none">
+          My text
+        </p> -->
       </div>
       <div class="get-started-wrap">
         <a class="btn btn-default btn-lg get-started-btn" onclick="generateText()">Generate Text</a>
@@ -31,6 +38,14 @@ use-site-title: true
 
   <!-- Function get the text -->
   <script type="text/javascript" language="javascript">
+
+
+
+  // var typeIt = new TypeIt('.type-it', {
+  //   speed: 20,
+  //   // autoStart: false,
+  //   // strings: ''
+  // });
 
     function generateText() {
       // var name = document.getElementById("client-name")
@@ -47,21 +62,34 @@ use-site-title: true
         //     message: message.value
         // })
       }
+      // typeIt.reset()
+      // typeIt.empty()
+      var typeIt = new TypeIt('.type-it', {
+        speed: 20,
+        // autoStart: false,
+        // strings: ''
+      });
+      typeIt.reset()
 
       document.getElementById("text-spinner").style.display = ''
-      document.getElementById("text-field").style.display = 'None'
-
+      // document.getElementById("text-field").style.display = 'None'
       return fetch('https://www.github.com', myInit)
         .then((response) => {
           document.getElementById("text-spinner").style.display = 'none'
-          document.getElementById("text-field").style.display = ''
+          // document.getElementById("text-field").style.display = ''
           return response
           // return 'true'
         })
         .catch((error) => {
           console.error(error);
           document.getElementById("text-spinner").style.display = 'none'
-          document.getElementById("text-field").style.display = ''
+          // document.getElementById("text-field").style.display = ''
+          typeIt.type('The cat and the hat. Yet bed any for travelling assistance indulgence unpleasing. ')
+          // new TypeIt('.type-it', {
+          //   speed: 20,
+          //   // autoStart: false,
+          //   strings: 'The cat and the hat. Yet bed any for travelling assistance indulgence unpleasing. '
+          // });
           return { "status": 0 }
         });
     }
