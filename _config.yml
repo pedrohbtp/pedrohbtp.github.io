@@ -22,11 +22,11 @@ description: Place for general information about myself and projects
 # --- Navigation bar options --- #
 
 # List of links in the navigation bar
-navbar-links:
-  About Me: "aboutme"
-  Projects: "Projects"
+# navbar-links:
+#   About Me: "aboutme"
+#   Projects: "projects"
   # Resources:
-    # - Beautiful Jekyll: "http://deanattali.com/beautiful-jekyll/"
+  #   - Beautiful Jekyll: "http://deanattali.com/beautiful-jekyll/"
     # - Learn markdown: "http://www.markdowntutorial.com/"
     # - GitHub Pages: "https://pages.github.com/"
   # Author's home: "http://deanattali.com"
