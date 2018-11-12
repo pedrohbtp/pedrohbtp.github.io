@@ -1,0 +1,68 @@
+---
+layout: page
+title: Language Model Example
+subtitle: Here you can automatically generate text from a previously trained Neural Network. 
+
+use-site-title: true
+---
+
+
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <div class="main-explain-area jumbotron">
+        <h3>Press the button to automatically generate text using our Neural Network!</h3>
+        <div id="text-spinner" class="spinner">
+          <div class="double-bounce1"></div>
+          <div class="double-bounce2"></div>
+        </div>
+        <p id="text-field" style="display:none">
+          My text
+        </p>
+      </div>
+      <div class="get-started-wrap">
+        <a class="btn btn-default btn-lg get-started-btn" onclick="generateText()">Generate Text</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <!-- Function get the text -->
+  <script type="text/javascript" language="javascript">
+
+    function generateText() {
+      // var name = document.getElementById("client-name")
+      var myInit = {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        method: 'GET',
+        mode: 'cors',
+        // body: JSON.stringify({
+        //     name: name.value,
+        //     email: email.value,
+        //     message: message.value
+        // })
+      }
+
+      document.getElementById("text-spinner").style.display = ''
+      document.getElementById("text-field").style.display = 'None'
+
+      return fetch('https://www.github.com', myInit)
+        .then((response) => {
+          document.getElementById("text-spinner").style.display = 'none'
+          document.getElementById("text-field").style.display = ''
+          return response
+          // return 'true'
+        })
+        .catch((error) => {
+          console.error(error);
+          document.getElementById("text-spinner").style.display = 'none'
+          document.getElementById("text-field").style.display = ''
+          return { "status": 0 }
+        });
+    }
+  </script>
