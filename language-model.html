@@ -12,7 +12,7 @@ use-site-title: true
     <div class="col-lg-8 col-lg col-md-10 col-md">
       <div class="main-explain-area jumbotron">
         <h3>Press the button to automatically generate text using our Neural Network!</h3>
-        <div id="text-spinner" class="spinner">
+        <div id="text-spinner" class="spinner" style="display:none"> 
           <div class="double-bounce1"></div>
           <div class="double-bounce2"></div>
         </div>
@@ -20,15 +20,9 @@ use-site-title: true
           <br/>
         </p>
         <span class="type-it"></span>
-        <!-- <div id="text-field" class="type-it" style="display:none">
-            <h4> </h4>
-        </div> -->
-        <!-- <p id="text-field" style="display:none">
-          My text
-        </p> -->
-      </div>
-      <div class="get-started-wrap">
-        <a class="btn btn-default btn-lg get-started-btn" onclick="generateText()">Generate Text</a>
+        <div class="get-started-wrap">
+          <a class="btn btn-default btn-lg get-started-btn" onclick="generateText()">Generate Text</a>
+        </div>
       </div>
     </div>
   </div>
@@ -39,16 +33,7 @@ use-site-title: true
   <!-- Function get the text -->
   <script type="text/javascript" language="javascript">
 
-
-
-  // var typeIt = new TypeIt('.type-it', {
-  //   speed: 20,
-  //   // autoStart: false,
-  //   // strings: ''
-  // });
-
     function generateText() {
-      // var name = document.getElementById("client-name")
       var myInit = {
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -62,34 +47,27 @@ use-site-title: true
         //     message: message.value
         // })
       }
-      // typeIt.reset()
-      // typeIt.empty()
-      var typeIt = new TypeIt('.type-it', {
-        speed: 20,
-        // autoStart: false,
-        // strings: ''
-      });
-      typeIt.reset()
 
       document.getElementById("text-spinner").style.display = ''
-      // document.getElementById("text-field").style.display = 'None'
-      return fetch('https://www.github.com', myInit)
-        .then((response) => {
+      return fetch('https://2vwz8x2992.execute-api.us-east-1.amazonaws.com/dev/inference', myInit)
+        .then(async (response) => {
+          var typeIt = new TypeIt('.type-it', {
+            speed: 20,
+          });
+          typeIt.reset()
           document.getElementById("text-spinner").style.display = 'none'
-          // document.getElementById("text-field").style.display = ''
+          response_json = await response.json()
+          typeIt.type(response_json['response']['text'])
           return response
-          // return 'true'
         })
         .catch((error) => {
+          var typeIt = new TypeIt('.type-it', {
+            speed: 20,
+          });
+          typeIt.reset()
           console.error(error);
           document.getElementById("text-spinner").style.display = 'none'
-          // document.getElementById("text-field").style.display = ''
-          typeIt.type('The cat and the hat. Yet bed any for travelling assistance indulgence unpleasing. ')
-          // new TypeIt('.type-it', {
-          //   speed: 20,
-          //   // autoStart: false,
-          //   strings: 'The cat and the hat. Yet bed any for travelling assistance indulgence unpleasing. '
-          // });
+          typeIt.type('There was an error. Try again ')
           return { "status": 0 }
         });
     }
