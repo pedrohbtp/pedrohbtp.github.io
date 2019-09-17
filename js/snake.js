@@ -79,17 +79,17 @@ let d;
 function direction(event) {
     let key = event.keyCode;
     if (key == 37 && d != "RIGHT") {
-        left.play();
+        // left.play();
         d = "LEFT";
     } else if (key == 38 && d != "DOWN") {
         d = "UP";
-        up.play();
+        // up.play();
     } else if (key == 39 && d != "LEFT") {
         d = "RIGHT";
-        right.play();
+        // right.play();
     } else if (key == 40 && d != "UP") {
         d = "DOWN";
-        down.play();
+        // down.play();
     }
     predictAndDraw()
     draw()
@@ -149,7 +149,7 @@ function draw() {
     // if the snake eats the food
     if (snakeX == food.x && snakeY == food.y) {
         score++;
-        eat.play();
+        // eat.play();
         food = {
             x: Math.floor(Math.random() * 17 + 1) * box,
             y: Math.floor(Math.random() * 15 + 3) * box
@@ -173,7 +173,7 @@ function draw() {
     if (snakeX < boardLimitXMin * box || snakeX > boardLimitXMax * box || snakeY < boardLimitYMin * box || snakeY > boardLimitYMax * box || collision(newHead, snake)) {
         clearInterval(game);
         // console.log('over')
-        dead.play();
+        // dead.play();
     }
 
     snake.unshift(newHead);
