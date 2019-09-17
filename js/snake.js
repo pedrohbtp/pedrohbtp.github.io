@@ -8,8 +8,6 @@ AI code from Pedro Torres
 const cvs = document.getElementById("snake");
 const ctx = cvs.getContext("2d");
 
-// create the unit
-const box = 32;
 
 // load images
 
@@ -18,6 +16,19 @@ ground.src = "img/ground.png";
 
 const foodImg = new Image();
 foodImg.src = "img/food.png";
+
+
+let origFoodSize = 32
+let origGroundSize = 608
+
+//const of ground squares
+const proportion = 19
+const scale = 2.5
+
+const imageSize = parseInt(origGroundSize/ scale)
+const foodSize = parseInt(origFoodSize/ scale)
+// create the unit
+const box = parseInt(imageSize/proportion)
 
 // load audio files
 
@@ -122,11 +133,11 @@ function addSnakeSegment() {
 
 function draw() {
 
-    ctx.drawImage(ground, 0, 0);
+    ctx.drawImage(ground, 0, 0, imageSize, imageSize);
     // console.log(getState())
     addSnakeSegment()
 
-    ctx.drawImage(foodImg, food.x, food.y);
+    ctx.drawImage(foodImg, food.x, food.y, foodSize, foodSize);
 
     // old head position
     let snakeX = snake[0].x;
@@ -179,7 +190,7 @@ function draw() {
     snake.unshift(newHead);
 
     ctx.fillStyle = "white";
-    ctx.font = "45px Changa one";
+    ctx.font = parseInt(30/2).toString()+"px Changa one";
     ctx.fillText(score, 2 * box, 1.6 * box);
 }
 
