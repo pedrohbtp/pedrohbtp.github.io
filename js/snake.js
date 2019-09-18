@@ -2,7 +2,7 @@
 Game interface from Learn Web Developement
 Youtube channel : https://www.youtube.com/channel/UC8n8ftV94ZU_DJLOLtrpORA
 
-AI code from Pedro Torres
+AI code from Pedro Torres @pedrohbtp
 */
 // const tf = require('@tensorflow/tfjs-node')
 const cvs = document.getElementById("snake");
