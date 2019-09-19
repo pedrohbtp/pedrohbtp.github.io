@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Snake Game AI
-subtitle: Watch the snake AI play the game!
+subtitle: Watch the snake AI coming to life by playing the game by itself!
 
 use-site-title: true
 ---
@@ -12,7 +12,7 @@ use-site-title: true
   <div class="row">
     <div class="col-lg-8 col-lg col-md-10 col-md">
       <div class="main-explain-area jumbotron">
-        <h3>Cheer for the snake AI as it plays the game and eventually screws up badly!</h3>
+        <h3>Cheer for the snake AI as it plays the game!</h3>
         <!-- <div id="text-spinner" class="spinner" style="display:none"> 
           <div class="double-bounce1"></div>
           <div class="double-bounce2"></div>
@@ -22,11 +22,14 @@ use-site-title: true
         </p>
         <!-- <canvas id="snake" width="608" height="608"></canvas> -->
         
-        <canvas id="snake" width="404" height="404"></canvas>
+        <canvas id="snake" width="300" height="300"></canvas>
         <!-- <span class="type-it"></span> -->
-        <!-- <div class="get-started-wrap">
-          <a class="btn btn-default btn-lg get-started-btn" onclick="generateText()">Generate Text</a>
-        </div> -->
+        <div class="get-started-wrap">
+          <a class="btn btn-default btn-lg get-started-btn" onclick="init()">Reset</a>
+        </div>
+        <p>
+          <br/>
+        </p>
         
         AI runs on tensorflow and it was trained using Reinforcement learning techniques
         using <a href="https://github.com/hill-a/stable-baselines"> stable-baselines. </a> 

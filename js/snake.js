@@ -18,6 +18,12 @@ const foodImg = new Image();
 foodImg.src = "img/food.png";
 
 
+// board limits
+let boardLimitXMax = 17
+let boardLimitXMin = 1
+let boardLimitYMax = 17
+let boardLimitYMin = 3
+
 let origFoodSize = 32
 let origGroundSize = 608
 
@@ -31,7 +37,6 @@ const foodSize = parseInt(origFoodSize/ scale)
 const box = parseInt(imageSize/proportion)
 
 // load audio files
-
 let dead = new Audio();
 let eat = new Audio();
 let up = new Audio();
@@ -50,39 +55,14 @@ down.src = "audio/down.mp3";
 let model = null
 // create the snake
 let snake = [];
-
-snake[0] = {
-    x: 9 * box,
-    y: 10 * box
-};
-snake[1] = {
-    x: 8 * box,
-    y: 9 * box
-};
-snake[2] = {
-    x: 7 * box,
-    y: 8 * box
-};
 // create the food
-
-let food = {
-    x: Math.floor(Math.random() * 17 + 1) * box,
-    y: Math.floor(Math.random() * 15 + 3) * box
-}
-
-// board limits
-let boardLimitXMax = 17
-let boardLimitXMin = 1
-let boardLimitYMax = 17
-let boardLimitYMin = 3
-
+let food
 // create the score var
-
-let score = 0;
-
+let score ;
 //control the snake
-
 let d;
+// variable that stores the event run every tick
+let game = null
 
 // adds the keyboard listener
 // document.addEventListener("keydown", direction);
@@ -229,10 +209,28 @@ function getState() {
     return list_resp
 }
 
-async function init() {
-    //loads model
-    let model = await tf.loadGraphModel('snake/model.json')
-    draw()
+function init() {
+    //resets to the initial state
+    clearInterval(game)
+    score = 0
+    snake[0] = {
+        x: 9 * box,
+        y: 10 * box
+    };
+    snake[1] = {
+        x: 8 * box,
+        y: 9 * box
+    };
+    snake[2] = {
+        x: 7 * box,
+        y: 8 * box
+    };
+
+    food = {
+        x: Math.floor(Math.random() * 17 + 1) * box,
+        y: Math.floor(Math.random() * 15 + 3) * box
+    }
+    game = setInterval(predictAndDraw, 90)//100)
 
 }
 async function test() {
@@ -289,16 +287,10 @@ async function predictAndDraw() {
     draw()
 }
 
-let game = null
-
 fetchModel().then(async modelResp => {
     model = modelResp
-    game = setInterval(predictAndDraw, 100)
+    init()  
 })
-
-// call draw function every 100 ms
-
-// let game = setInterval(draw,100);
 
 
 
