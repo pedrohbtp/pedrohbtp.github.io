@@ -31,10 +31,10 @@ let origGroundSize = 608
 const proportion = 19
 const scale = 2.5
 
-const imageSize = parseInt(origGroundSize/ scale)
-const foodSize = parseInt(origFoodSize/ scale)
+const imageSize = parseInt(origGroundSize / scale)
+const foodSize = parseInt(origFoodSize / scale)
 // create the unit
-const box = parseInt(imageSize/proportion)
+const box = parseInt(imageSize / proportion)
 
 // load audio files
 let dead = new Audio();
@@ -58,7 +58,7 @@ let snake = [];
 // create the food
 let food
 // create the score var
-let score ;
+let score;
 //control the snake
 let d;
 // variable that stores the event run every tick
@@ -170,7 +170,7 @@ function draw() {
     snake.unshift(newHead);
 
     ctx.fillStyle = "white";
-    ctx.font = parseInt(30/2).toString()+"px Changa one";
+    ctx.font = parseInt(30 / 2).toString() + "px Changa one";
     ctx.fillText(score, 2 * box, 1.6 * box);
 }
 
@@ -242,7 +242,7 @@ const MODEL_HTTP_URL = 'snake/model.json';
 async function fetchModel() {
     try {
         // console.log('url: ', window.location.href + MODEL_HTTP_URL)
-        let model = await tf.loadGraphModel(window.location.href + MODEL_HTTP_URL);
+        let model = await tf.loadGraphModel(window.location.href.split('snake-rl')[0] + 'snake-rl/' + MODEL_HTTP_URL);
         // console.log('Model loaded from HTTP.');
         // console.log(model);
         return model;
@@ -261,15 +261,15 @@ async function predictAndDraw() {
     // calls predict on the model
     let preResp = await model.predict(a).array()
     // let actionIndex = preResp[0].indexOf(Math.max(...preResp[0]))
-    indexes = preResp[0].map((val, ind) => {return {ind, val}})
-           .sort((a, b) => {return a.val > b.val ? 1 : a.val == b.val ? 0 : -1 })
-           .map((obj) => obj.ind)
-    actionIndex = indexes[indexes.length-1]
+    indexes = preResp[0].map((val, ind) => { return { ind, val } })
+        .sort((a, b) => { return a.val > b.val ? 1 : a.val == b.val ? 0 : -1 })
+        .map((obj) => obj.ind)
+    actionIndex = indexes[indexes.length - 1]
     // console.log(indexes)
     // console.log('preResp', preResp[0])
     // avoid choosing the opposite direction:
-    if ((actionIndex == 0 && d == 'LEFT') ||  (actionIndex == 1 && d == 'RIGHT') || (actionIndex == 2&& d == 'DOWN') || (actionIndex == 3 && d == 'UP')) {
-        actionIndex = indexes[indexes.length-2]
+    if ((actionIndex == 0 && d == 'LEFT') || (actionIndex == 1 && d == 'RIGHT') || (actionIndex == 2 && d == 'DOWN') || (actionIndex == 3 && d == 'UP')) {
+        actionIndex = indexes[indexes.length - 2]
     }
     let preDir = d
     if (actionIndex == 0) {
@@ -289,7 +289,7 @@ async function predictAndDraw() {
 
 fetchModel().then(async modelResp => {
     model = modelResp
-    init()  
+    init()
 })
 
 
