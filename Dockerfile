@@ -2,7 +2,6 @@ FROM jekyll/jekyll
 
 COPY Gemfile .
 COPY Gemfile.lock .
-
-RUN bundle install --quiet --clean
-
+RUN gem install bundler
+RUN bundle install
 CMD ["jekyll", "serve"]

@@ -1,0 +1,14 @@
+version: '2.1'
+
+services:
+  jekyll-service:
+    image: jekyll
+    build: .
+    restart: always
+    working_dir: /usr/app
+    ports:
+      - 4000:4000
+    volumes:
+      - .:/usr/app/
+    command: "jekyll serve --watch"
+
