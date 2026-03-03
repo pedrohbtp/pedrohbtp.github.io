@@ -30,8 +30,10 @@
   {% endif %}
 
   {% if layout.common-googlefonts %}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     {% for font in layout.common-googlefonts %}
-      <link rel="stylesheet" href="//fonts.googleapis.com/css?family={{ font }}" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?{{ font }}" />
     {% endfor %}
   {% endif %}
 
@@ -48,8 +50,10 @@
   {% endif %}
 
   {% if page.googlefonts %}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     {% for font in page.googlefonts %}
-      <link rel="stylesheet" href="//fonts.googleapis.com/css?family={{ font }}" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?{{ font }}" />
     {% endfor %}
   {% endif %}
 

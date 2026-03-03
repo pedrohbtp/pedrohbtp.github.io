@@ -1,42 +1,75 @@
 ---
-layout: page
-title: About me
-subtitle: Software Engineer and Entrepreneur
-
-use-site-title: True
+layout: home
+title: Pedro Borges Torres
 ---
-<div class="container" role="main">
-    <div class="row">
-        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <p>MS in Computer Science from UCLA, specializing in AI. Ex-IBM. Co-founder of
-                <a class="item-link" href="https://dynacloud.io/" title="Website">Dynacloud.</a>
-                Experienced in AI, ML, backend development and cloud computing.
-            </p>
-            <p>Here you can find projects with which I am involved.</p>
-            <p>For consulting services, feel free to get in touch on
-                <a class="item-link" href="https://www.linkedin.com/in/pedrohbtp" title="LinkedIn">LinkedIn.</a>
-            </p>
+
+<!-- Hero -->
+<section class="hero-section">
+    <div class="hero-inner">
+        <p class="hero-eyebrow">Hi, I'm</p>
+        <h1 class="hero-name">Pedro Borges Torres</h1>
+        <p class="hero-tagline">Software Engineer &amp; Entrepreneur</p>
+        <p class="hero-bio">
+            MS in Computer Science from UCLA, specializing in AI. Ex-IBM. Co-founder of
+            <a href="https://dynacloud.io/">Dynacloud</a>.
+            Building intelligent systems at the intersection of AI, cloud, and product.
+        </p>
+        <div class="hero-cta">
+            <a href="https://www.linkedin.com/in/pedrohbtp" class="btn-hero btn-hero-primary">
+                <i class="fa fa-linkedin"></i> LinkedIn
+            </a>
+            <a href="https://github.com/pedrohbtp" class="btn-hero btn-hero-secondary">
+                <i class="fa fa-github"></i> GitHub
+            </a>
         </div>
     </div>
+</section>
 
+<!-- Main content -->
+<div class="container home-body" role="main">
     <div class="row">
         <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <h2 class="section-heading">On the Media</h2>
-            <div style="display:flex; flex-direction:column; gap:20px;">
-                <iframe width="100%" height="360" src="https://www.youtube.com/embed/Jh9m3pTkQ68"
-                    title="YouTube video player" frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowfullscreen style="border-radius:8px;"></iframe>
-                <iframe width="100%" height="360" src="https://www.youtube.com/embed/O_YVN69nSTM?si=YEyfr0FpCOeTAkwl"
-                    title="YouTube video player" frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowfullscreen style="border-radius:8px;"></iframe>
+
+            <!-- Skills -->
+            <div class="skills-row" aria-label="Technologies">
+                <span class="skill-pill">Python</span>
+                <span class="skill-pill">PyTorch</span>
+                <span class="skill-pill">LLMs</span>
+                <span class="skill-pill">AWS</span>
+                <span class="skill-pill">Cloud</span>
+                <span class="skill-pill">Backend</span>
+                <span class="skill-pill">Machine Learning</span>
             </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <!-- Media -->
+            <h2 class="section-heading">On the Media</h2>
+            <div class="media-grid">
+
+                <div class="media-card">
+                    <div class="media-thumb" data-videoid="Jh9m3pTkQ68">
+                        <img src="https://img.youtube.com/vi/Jh9m3pTkQ68/hqdefault.jpg"
+                             alt="YouTube: Pedro Borges Torres interview">
+                        <div class="media-play-btn" aria-label="Play video">
+                            <i class="fa fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="media-embed" style="display:none;"></div>
+                </div>
+
+                <div class="media-card">
+                    <div class="media-thumb" data-videoid="O_YVN69nSTM">
+                        <img src="https://img.youtube.com/vi/O_YVN69nSTM/hqdefault.jpg"
+                             alt="YouTube: Pedro Borges Torres interview 2">
+                        <div class="media-play-btn" aria-label="Play video">
+                            <i class="fa fa-play"></i>
+                        </div>
+                    </div>
+                    <div class="media-embed" style="display:none;"></div>
+                </div>
+
+            </div>
+
+            <!-- Projects -->
             <h2 class="section-heading">Projects</h2>
             <div class="list-circles">
 
@@ -46,13 +79,18 @@ use-site-title: True
                     </a>
                     <h4 class="item-name">deduz.ai</h4>
                     <div class="item-desc">AI assistant using LLMs to help answer questions about filing taxes in Brazil.</div>
+                    <div class="item-tags">
+                        <span class="item-tag">LLMs</span>
+                        <span class="item-tag">Python</span>
+                        <span class="item-tag">AI</span>
+                    </div>
                     <div class="item-links">
                         <a class="item-link" href="https://deduz.ai/" title="Website">
                             <span class="fa fa-home"></span>
                         </a>
                         <a class="item-link"
-                            href="https://exame.com/tecnologia/deixou-para-declarar-o-ir-na-ultima-hora-essa-inteligencia-artificial-pode-te-ajudar/"
-                            title="Press coverage">
+                           href="https://exame.com/tecnologia/deixou-para-declarar-o-ir-na-ultima-hora-essa-inteligencia-artificial-pode-te-ajudar/"
+                           title="Press coverage">
                             <span class="fa fa-newspaper-o"></span>
                         </a>
                     </div>
@@ -63,7 +101,12 @@ use-site-title: True
                         <img src="./img/pytorch-logo.png" class="item-img" alt="PyTorch logo">
                     </a>
                     <h4 class="item-name">pytorch-zappa-serverless</h4>
-                    <div class="item-desc">Deploy an AI PyTorch application to AWS Lambda using Zappa — serverless ML inference.</div>
+                    <div class="item-desc">Deploy a PyTorch model to AWS Lambda using Zappa — serverless ML inference.</div>
+                    <div class="item-tags">
+                        <span class="item-tag">PyTorch</span>
+                        <span class="item-tag">AWS Lambda</span>
+                        <span class="item-tag">Serverless</span>
+                    </div>
                     <div class="item-links">
                         <a class="item-link" href="/language-model" title="Demo">
                             <span class="fa fa-home"></span>
@@ -80,6 +123,10 @@ use-site-title: True
                     </a>
                     <h4 class="item-name">snake-reinforcement-learning</h4>
                     <div class="item-desc">Live demo of a trained RL agent playing a simplified version of the classic Snake game.</div>
+                    <div class="item-tags">
+                        <span class="item-tag">Reinforcement Learning</span>
+                        <span class="item-tag">Python</span>
+                    </div>
                     <div class="item-links">
                         <a class="item-link" href="/snake-rl" title="Play demo">
                             <span class="fa fa-home"></span>
@@ -93,6 +140,10 @@ use-site-title: True
                     </a>
                     <h4 class="item-name">PBandJay</h4>
                     <div class="item-desc">An autoservice application for restaurants and bars — streamlining ordering and payments.</div>
+                    <div class="item-tags">
+                        <span class="item-tag">Mobile</span>
+                        <span class="item-tag">Node.js</span>
+                    </div>
                     <div class="item-links">
                         <a class="item-link" href="https://pbandjay.io/" title="Website">
                             <span class="fa fa-home"></span>
@@ -109,6 +160,10 @@ use-site-title: True
                     </a>
                     <h4 class="item-name">Sababa News</h4>
                     <div class="item-desc">Collaborative news platform. Built with <a href="https://github.com/israelsaba">Israel Saba</a>.</div>
+                    <div class="item-tags">
+                        <span class="item-tag">Collaborative</span>
+                        <span class="item-tag">Web</span>
+                    </div>
                     <div class="item-links">
                         <a class="item-link" href="https://sababa.news/" title="Website">
                             <span class="fa fa-home"></span>
@@ -117,6 +172,31 @@ use-site-title: True
                 </div>
 
             </div>
+
+            <!-- Consulting CTA -->
+            <div class="contact-cta">
+                <p>Interested in working together? Get in touch on
+                    <a href="https://www.linkedin.com/in/pedrohbtp">LinkedIn</a>.
+                </p>
+            </div>
+
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    document.querySelectorAll('.media-thumb').forEach(function (thumb) {
+        thumb.addEventListener('click', function () {
+            var videoId = thumb.dataset.videoid;
+            var embed = thumb.parentElement.querySelector('.media-embed');
+            embed.innerHTML = '<iframe width="100%" src="https://www.youtube.com/embed/' +
+                videoId + '?autoplay=1" frameborder="0" ' +
+                'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" ' +
+                'allowfullscreen></iframe>';
+            embed.style.display = 'block';
+            thumb.style.display = 'none';
+        });
+    });
+}());
+</script>
