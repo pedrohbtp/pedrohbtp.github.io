@@ -7,6 +7,11 @@ _site
 test-results/
 playwright-report/
 
+# dependencies
+node_modules/
+.bundle/
+package-lock.json
+
 # general
 .DS_Store
 Thumbs.db

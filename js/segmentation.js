@@ -132,7 +132,7 @@ async function initModel(onProgress) {
   env.allowLocalModels = false;
   env.useBrowserCache  = true;
 
-  var MODEL_ID = 'Xenova/mobile_sam';
+  var MODEL_ID = 'Xenova/slimsam-77-uniform';
   var cb = function (info) { if (onProgress) onProgress(info); };
 
   var results = await Promise.all([
