@@ -10,13 +10,16 @@ via Bundler using the `Gemfile` and `Gemfile.lock`.
 Run the following commands:
 
 ```bash
+# Install the pinned bundler version first (fixes CGI compatibility issue with bundler 4.x)
+gem install bundler -v 2.7.2 --no-document
+
 # Install all gem dependencies via Bundler
-bundle install
+bundle _2.7.2_ install
 ```
 
 ### Verify
 
 ```bash
-RUBYOPT="-E utf-8" bundle exec jekyll --version
+RUBYOPT="-E utf-8" PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" bundle _2.7.2_ exec jekyll --version
 # Expected: jekyll 3.x.x
 ```

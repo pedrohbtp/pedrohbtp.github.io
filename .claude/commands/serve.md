@@ -9,8 +9,8 @@ Dependencies must be installed first. Run `/install` if you haven't already.
 ## Start the server
 
 ```bash
-RUBYOPT="-E utf-8" \
-  bundle exec jekyll serve \
+RUBYOPT="-E utf-8" PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" \
+  bundle _2.7.2_ exec jekyll serve \
   --port 4000 \
   --destination /home/user/jekyll_site
 ```

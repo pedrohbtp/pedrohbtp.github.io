@@ -3,6 +3,10 @@ _site
 .sass-cache
 .vagrant
 
+# playwright
+test-results/
+playwright-report/
+
 # general
 .DS_Store
 Thumbs.db

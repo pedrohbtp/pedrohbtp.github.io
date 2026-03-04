@@ -1,18 +1,37 @@
 # pedrohbtp.github.io
 
-This repository contains all the code for my personal website on github pages
+Personal portfolio/blog for Pedro Borges Torres, hosted on GitHub Pages. Based on [Beautiful Jekyll](https://github.com/daattali/beautiful-jekyll).
 
-Based on Beautiful Jekyll
+## Install
 
-To run locally:
-* Follow install instructions here: https://help.github.com/articles/setting-up-your-github-pages-site-locally-with-jekyll/
-* Execute: 
 ```bash
-bundle exec jekyll serve
-``` 
-# updating packages
+gem install bundler -v 2.7.2 --no-document
+bundle _2.7.2_ install
+```
 
-https://bundler.io/v1.2/man/bundle-update.1.html
+## Serve
+
 ```bash
-bundle update
+RUBYOPT="-E utf-8" PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" \
+  bundle _2.7.2_ exec jekyll serve --port 4000 --destination /home/user/jekyll_site
+```
+
+Visit http://localhost:4000. The server auto-regenerates on file changes.
+
+## Test
+
+Runs the Playwright E2E suite (40 tests) against all pages:
+
+```bash
+# Build site and run all tests (one command)
+PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test
+
+# Or run tests against an already-running server
+/opt/node22/bin/playwright test
+```
+
+## Update gems
+
+```bash
+bundle _2.7.2_ update
 ```

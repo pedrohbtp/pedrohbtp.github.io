@@ -186,6 +186,10 @@ exclude:
   - LICENSE
   - README.md
   - Vagrantfile
+  - Rakefile
+  - package.json
+  - playwright.config.js
+  - tests/
 
 # prose.io config
 prose:
