@@ -1,312 +1,334 @@
 /*
-Game interface from Learn Web Developement
+Game interface from Learn Web Development
 Youtube channel : https://www.youtube.com/channel/UC8n8ftV94ZU_DJLOLtrpORA
 
 AI code from Pedro Borges Torres @pedrohbtp
 */
-// const tf = require('@tensorflow/tfjs-node')
 const cvs = document.getElementById("snake");
 const ctx = cvs.getContext("2d");
 
+// Canvas dimensions
+const canvasSize = 380;
+const proportion = 19;
+const box = Math.floor(canvasSize / proportion); // 20px
 
-// load images
+// Board limits (in grid units)
+let boardLimitXMax = 17;
+let boardLimitXMin = 1;
+let boardLimitYMax = 17;
+let boardLimitYMin = 3;
 
-const ground = new Image();
-ground.src = "img/ground.png";
-
-const foodImg = new Image();
-foodImg.src = "img/food.png";
-
-
-// board limits
-let boardLimitXMax = 17
-let boardLimitXMin = 1
-let boardLimitYMax = 17
-let boardLimitYMin = 3
-
-let origFoodSize = 32
-let origGroundSize = 608
-
-//const of ground squares
-const proportion = 19
-const scale = 2.5
-
-const imageSize = parseInt(origGroundSize / scale)
-const foodSize = parseInt(origFoodSize / scale)
-// create the unit
-const box = parseInt(imageSize / proportion)
-
-// load audio files
-let dead = new Audio();
-let eat = new Audio();
-let up = new Audio();
-let right = new Audio();
-let left = new Audio();
-let down = new Audio();
-
-dead.src = "audio/dead.mp3";
-eat.src = "audio/eat.mp3";
-up.src = "audio/up.mp3";
-right.src = "audio/right.mp3";
-left.src = "audio/left.mp3";
-down.src = "audio/down.mp3";
+// Palette matching the site design system
+const COLOR_BG        = '#0F1923';
+const COLOR_GRID      = 'rgba(255, 255, 255, 0.04)';
+const COLOR_HEAD      = '#7EC8E3';  // site hero tagline cyan
+const COLOR_BODY      = '#4A7FA5';  // site link colour
+const COLOR_BODY_MID  = '#3A6A8F';  // subtle mid-tone for body gradient
+const COLOR_FOOD      = '#FC8181';  // coral/red for contrast
 
 // AI model
-let model = null
-// create the snake
+let model = null;
+// Snake segments
 let snake = [];
-// create the food
-let food
-// create the score var
+// Food position
+let food;
+// Score
 let score;
-//control the snake
+// Current direction
 let d;
-// variable that stores the event run every tick
-let game = null
+// Game interval handle
+let game = null;
 
-// adds the keyboard listener
-// document.addEventListener("keydown", direction);
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
-function direction(event) {
-    let key = event.keyCode;
-    if (key == 37 && d != "RIGHT") {
-        // left.play();
-        d = "LEFT";
-    } else if (key == 38 && d != "DOWN") {
-        d = "UP";
-        // up.play();
-    } else if (key == 39 && d != "LEFT") {
-        d = "RIGHT";
-        // right.play();
-    } else if (key == 40 && d != "UP") {
-        d = "DOWN";
-        // down.play();
+function setStatus(text, cls) {
+    const el = document.getElementById('snake-status');
+    if (el) {
+        el.textContent = text;
+        el.className = 'snake-status ' + cls;
     }
-    predictAndDraw()
-    draw()
 }
 
-// cheack collision function
+function setScore(val) {
+    const el = document.getElementById('snake-score');
+    if (el) el.textContent = val;
+}
+
+/** Draw a filled rounded rectangle on ctx. */
+function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// ── Drawing ───────────────────────────────────────────────────────────────────
+
+function drawBackground() {
+    // Dark fill
+    ctx.fillStyle = COLOR_BG;
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+    // Subtle grid
+    ctx.strokeStyle = COLOR_GRID;
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= proportion; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * box, 0);
+        ctx.lineTo(i * box, canvasSize);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * box);
+        ctx.lineTo(canvasSize, i * box);
+        ctx.stroke();
+    }
+
+    // Score label in top margin
+    ctx.fillStyle = 'rgba(144,164,190,0.5)';
+    ctx.font = '600 11px Inter, DM Sans, sans-serif';
+    ctx.fillText('SCORE', box * boardLimitXMin, box * 1.5);
+}
+
+function drawFood() {
+    const cx = food.x + box / 2;
+    const cy = food.y + box / 2;
+    const r  = box / 2 - 3;
+
+    // Outer glow
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r + 6);
+    glow.addColorStop(0, 'rgba(252,129,129,0.4)');
+    glow.addColorStop(1, 'rgba(252,129,129,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Core
+    ctx.fillStyle = COLOR_FOOD;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function addSnakeSegment() {
+    const inset = 2;
+    const radius = 4;
+    const segW = box - inset * 2;
+    const segH = box - inset * 2;
+
+    for (let i = snake.length - 1; i >= 0; i--) {
+        const isHead = i === 0;
+
+        // Fade body segments slightly toward the tail
+        if (isHead) {
+            ctx.fillStyle = COLOR_HEAD;
+        } else {
+            // Interpolate between body colour and a darker shade near the tail
+            const t = i / (snake.length - 1 || 1);
+            ctx.fillStyle = t < 0.5 ? COLOR_BODY : COLOR_BODY_MID;
+        }
+
+        roundRect(
+            snake[i].x + inset,
+            snake[i].y + inset,
+            segW,
+            segH,
+            radius
+        );
+
+        // Eyes on the head
+        if (isHead) {
+            ctx.fillStyle = COLOR_BG;
+            const eyeR = 2;
+            const eyeOffset = box * 0.28;
+            let eye1x, eye1y, eye2x, eye2y;
+
+            if (d === 'RIGHT') {
+                eye1x = snake[i].x + box - 6; eye1y = snake[i].y + eyeOffset;
+                eye2x = snake[i].x + box - 6; eye2y = snake[i].y + box - eyeOffset;
+            } else if (d === 'LEFT') {
+                eye1x = snake[i].x + 6; eye1y = snake[i].y + eyeOffset;
+                eye2x = snake[i].x + 6; eye2y = snake[i].y + box - eyeOffset;
+            } else if (d === 'UP') {
+                eye1x = snake[i].x + eyeOffset;     eye1y = snake[i].y + 6;
+                eye2x = snake[i].x + box - eyeOffset; eye2y = snake[i].y + 6;
+            } else {
+                eye1x = snake[i].x + eyeOffset;     eye1y = snake[i].y + box - 6;
+                eye2x = snake[i].x + box - eyeOffset; eye2y = snake[i].y + box - 6;
+            }
+
+            ctx.beginPath(); ctx.arc(eye1x, eye1y, eyeR, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(eye2x, eye2y, eyeR, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+}
+
+// ── Game logic ────────────────────────────────────────────────────────────────
+
 function collision(head, array) {
     for (let i = 0; i < array.length; i++) {
-        if (head.x == array[i].x && head.y == array[i].y) {
-            return true;
-        }
+        if (head.x === array[i].x && head.y === array[i].y) return true;
     }
     return false;
 }
 
-function addSnakeSegment() {
-
-    // adds a segment to the snake
-    for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = (i == 0) ? "green" : "white";
-        ctx.fillRect(snake[i].x, snake[i].y, box, box);
-
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
-    }
-
-}
-
-// draw everything to the canvas
-
 function draw() {
+    drawBackground();
+    addSnakeSegment();
+    drawFood();
 
-    ctx.drawImage(ground, 0, 0, imageSize, imageSize);
-    // console.log(getState())
-    addSnakeSegment()
-
-    ctx.drawImage(foodImg, food.x, food.y, foodSize, foodSize);
-
-    // old head position
+    // Move head
     let snakeX = snake[0].x;
     let snakeY = snake[0].y;
 
-    // which direction
-    if (d == "LEFT") {
-        snakeX -= box;
-    }
-    if (d == "UP") {
-        snakeY -= box;
-    }
-    if (d == "RIGHT") {
-        snakeX += box;
-    }
-    if (d == "DOWN") {
-        snakeY += box;
-    }
+    if (d === 'LEFT')  snakeX -= box;
+    if (d === 'UP')    snakeY -= box;
+    if (d === 'RIGHT') snakeX += box;
+    if (d === 'DOWN')  snakeY += box;
 
-    // if the snake eats the food
-    if (snakeX == food.x && snakeY == food.y) {
+    // Eat food
+    if (snakeX === food.x && snakeY === food.y) {
         score++;
-        // eat.play();
+        setScore(score);
         food = {
             x: Math.floor(Math.random() * 17 + 1) * box,
             y: Math.floor(Math.random() * 15 + 3) * box
-        }
-        // simplify game removing tail
-        snake.pop();
+        };
     } else {
-        // remove the tail
         snake.pop();
     }
 
-    // add new Head
+    const newHead = { x: snakeX, y: snakeY };
 
-    let newHead = {
-        x: snakeX,
-        y: snakeY
-    }
-
-    // game over
-
-    if (snakeX < boardLimitXMin * box || snakeX > boardLimitXMax * box || snakeY < boardLimitYMin * box || snakeY > boardLimitYMax * box || collision(newHead, snake)) {
+    // Game over
+    if (
+        snakeX < boardLimitXMin * box || snakeX > boardLimitXMax * box ||
+        snakeY < boardLimitYMin * box || snakeY > boardLimitYMax * box ||
+        collision(newHead, snake)
+    ) {
         clearInterval(game);
-        // console.log('over')
-        // dead.play();
+        setStatus('Game Over', 'over');
+        // Draw a subtle overlay
+        ctx.fillStyle = 'rgba(15, 25, 35, 0.6)';
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
+        ctx.fillStyle = '#FC8181';
+        ctx.font = 'bold 22px Inter, DM Sans, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvasSize / 2, canvasSize / 2 - 10);
+        ctx.fillStyle = 'rgba(144,164,190,0.8)';
+        ctx.font = '13px Inter, DM Sans, sans-serif';
+        ctx.fillText('Press Reset to play again', canvasSize / 2, canvasSize / 2 + 18);
+        ctx.textAlign = 'left';
+        return;
     }
 
     snake.unshift(newHead);
-
-    ctx.fillStyle = "white";
-    ctx.font = parseInt(30 / 2).toString() + "px Changa one";
-    ctx.fillText(score, 2 * box, 1.6 * box);
 }
 
 function getState() {
-    // it is inverted because during training it is like this
+    // Axes are inverted to match training convention
     let snakeY = snake[0].x;
     let snakeX = snake[0].y;
-    let isBoardLeft = snakeX <= (boardLimitXMin + 1) * box
-    let isBoardRight = snakeX >= (boardLimitXMax - 1) * box
-    let isBoardUp = snakeY <= (boardLimitYMin + 1) * box
-    let isBoardDown = snakeY >= (boardLimitYMax - 1) * box
+    let isBoardLeft  = snakeX <= (boardLimitXMin + 1) * box;
+    let isBoardRight = snakeX >= (boardLimitXMax - 1) * box;
+    let isBoardUp    = snakeY <= (boardLimitYMin + 1) * box;
+    let isBoardDown  = snakeY >= (boardLimitYMax - 1) * box;
 
-    dict_rep = {
-        // it is inverted because the training was like that
-        'is_food_left': snake[0].y > food.y,
-        'is_food_right': snake[0].y < food.y,
-        'is_food_up': snake[0].x > food.x,
-        'is_food_down': snake[0].x < food.x,
-        'is_moving_left': d == 'LEFT',
-        'is_moving_right': d == 'RIGHT',
-        'is_moving_up': d == 'UP',
-        'is_moving_down': d == 'DOWN',
-        // the flags that represent danger
-        'is_danger_left': isBoardLeft,
+    const dict_rep = {
+        'is_food_left':    snake[0].y > food.y,
+        'is_food_right':   snake[0].y < food.y,
+        'is_food_up':      snake[0].x > food.x,
+        'is_food_down':    snake[0].x < food.x,
+        'is_moving_left':  d === 'LEFT',
+        'is_moving_right': d === 'RIGHT',
+        'is_moving_up':    d === 'UP',
+        'is_moving_down':  d === 'DOWN',
+        'is_danger_left':  isBoardLeft,
         'is_danger_right': isBoardRight,
-        'is_danger_up': isBoardUp,
-        'is_danger_down': isBoardDown
+        'is_danger_up':    isBoardUp,
+        'is_danger_down':  isBoardDown
+    };
 
+    const list_resp = [];
+    for (const i in dict_rep) {
+        list_resp.push(dict_rep[i] === true ? 1 : 0);
     }
-    // console.log(dict_rep)
-    list_resp = []
-    for (i in dict_rep) {
-        // console.log(i)
-        list_resp.push(dict_rep[i] == true ? 1 : 0)
-    }
-    return list_resp
+    return list_resp;
 }
 
 function init() {
-    //resets to the initial state
-    clearInterval(game)
-    score = 0
-    snake[0] = {
-        x: 9 * box,
-        y: 10 * box
-    };
-    snake[1] = {
-        x: 8 * box,
-        y: 9 * box
-    };
-    snake[2] = {
-        x: 7 * box,
-        y: 8 * box
-    };
+    clearInterval(game);
+    score = 0;
+    setScore(0);
+    setStatus('Running', 'running');
+
+    d = 'RIGHT';
+
+    snake[0] = { x: 9 * box, y: 10 * box };
+    snake[1] = { x: 8 * box, y: 9  * box };
+    snake[2] = { x: 7 * box, y: 8  * box };
+    snake.length = 3;
 
     food = {
         x: Math.floor(Math.random() * 17 + 1) * box,
         y: Math.floor(Math.random() * 15 + 3) * box
+    };
+
+    game = setInterval(predictAndDraw, 90);
+}
+
+async function predictAndDraw() {
+    const state  = getState();
+    const a      = tf.tensor2d([state], [1, 12], 'int32');
+    const preResp = await model.predict(a).array();
+
+    let indexes = preResp[0]
+        .map((val, ind) => ({ ind, val }))
+        .sort((a, b) => a.val - b.val)
+        .map((obj) => obj.ind);
+
+    let actionIndex = indexes[indexes.length - 1];
+
+    // Avoid reversing direction
+    if (
+        (actionIndex === 0 && d === 'LEFT')  ||
+        (actionIndex === 1 && d === 'RIGHT') ||
+        (actionIndex === 2 && d === 'DOWN')  ||
+        (actionIndex === 3 && d === 'UP')
+    ) {
+        actionIndex = indexes[indexes.length - 2];
     }
-    game = setInterval(predictAndDraw, 90)//100)
 
-}
-async function test() {
+    if      (actionIndex === 0) d = 'RIGHT';
+    else if (actionIndex === 1) d = 'LEFT';
+    else if (actionIndex === 2) d = 'UP';
+    else if (actionIndex === 3) d = 'DOWN';
 
-    const saveResults = await model.save('localstorage://my-model-1');
+    draw();
 }
+
 const MODEL_HTTP_URL = 'snake/model.json';
 
 async function fetchModel() {
     try {
-        // console.log('url: ', window.location.href + MODEL_HTTP_URL)
-        let model = await tf.loadGraphModel(window.location.href.split('snake-rl')[0] + 'snake-rl/' + MODEL_HTTP_URL);
-        // console.log('Model loaded from HTTP.');
-        // console.log(model);
+        const model = await tf.loadGraphModel(
+            window.location.href.split('snake-rl')[0] + 'snake-rl/' + MODEL_HTTP_URL
+        );
         return model;
     } catch (error) {
         console.error(error);
     }
 }
 
-// init()
-
-
-
-async function predictAndDraw() {
-    let state = getState()
-    let a = tf.tensor2d([state], shape = [1, 12], dtype = "int32")
-    // calls predict on the model
-    let preResp = await model.predict(a).array()
-    // let actionIndex = preResp[0].indexOf(Math.max(...preResp[0]))
-    indexes = preResp[0].map((val, ind) => { return { ind, val } })
-        .sort((a, b) => { return a.val > b.val ? 1 : a.val == b.val ? 0 : -1 })
-        .map((obj) => obj.ind)
-    actionIndex = indexes[indexes.length - 1]
-    // console.log(indexes)
-    // console.log('preResp', preResp[0])
-    // avoid choosing the opposite direction:
-    if ((actionIndex == 0 && d == 'LEFT') || (actionIndex == 1 && d == 'RIGHT') || (actionIndex == 2 && d == 'DOWN') || (actionIndex == 3 && d == 'UP')) {
-        actionIndex = indexes[indexes.length - 2]
-    }
-    let preDir = d
-    if (actionIndex == 0) {
-        preDir = 'RIGHT'
-    } else if (actionIndex == 1) {
-        preDir = 'LEFT'
-    } else if (actionIndex == 2) {
-        preDir = 'UP'
-    } else if (actionIndex == 3) {
-        preDir = 'DOWN'
-    }
-    // console.log('action index: ', actionIndex)
-    // console.log('direction: ', preDir)
-    d = preDir
-    draw()
-}
-
-fetchModel().then(async modelResp => {
-    model = modelResp
-    init()
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fetchModel().then(modelResp => {
+    model = modelResp;
+    init();
+});
