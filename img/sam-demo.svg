@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Photo frame background -->
+  <rect x="8" y="12" width="84" height="64" rx="5" fill="#1a2a3a"/>
+
+  <!-- Sky gradient area -->
+  <rect x="8" y="12" width="84" height="32" rx="5" fill="#1e3a52"/>
+  <rect x="8" y="32" width="84" height="12" fill="#1e3a52"/>
+
+  <!-- Ground area -->
+  <rect x="8" y="44" width="84" height="32" rx="0" fill="#152230"/>
+  <rect x="8" y="73" width="84" height="3" rx="0" fill="#152230"/>
+
+  <!-- Rounded bottom corners for frame -->
+  <rect x="8" y="44" width="84" height="32" rx="0" fill="#152230"/>
+  <path d="M8 72 L8 76 Q8 76 13 76 L87 76 Q92 76 92 72 Z" fill="#152230"/>
+
+  <!-- Segmented object: a simple house shape with mask overlay -->
+  <!-- House body -->
+  <rect x="34" y="46" width="32" height="24" rx="1" fill="#2a4a6a"/>
+  <!-- House roof -->
+  <polygon points="30,48 50,32 70,48" fill="#2a5a7a"/>
+  <!-- Door -->
+  <rect x="45" y="58" width="10" height="12" rx="1" fill="#1a3a5a"/>
+
+  <!-- SAM mask overlay on the house (blue semi-transparent) -->
+  <rect x="34" y="46" width="32" height="24" rx="1" fill="rgba(74, 127, 200, 0.5)"/>
+  <polygon points="30,48 50,32 70,48" fill="rgba(74, 127, 200, 0.5)"/>
+
+  <!-- Mask outline / glow -->
+  <polygon points="30,48 50,32 70,48" fill="none" stroke="#7EC8E3" stroke-width="1.5" opacity="0.8"/>
+  <rect x="34" y="46" width="32" height="24" rx="1" fill="none" stroke="#7EC8E3" stroke-width="1.5" opacity="0.8"/>
+
+  <!-- Cursor / click indicator -->
+  <circle cx="50" cy="52" r="3.5" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.9"/>
+  <line x1="50" y1="46.5" x2="50" y2="44" stroke="#ffffff" stroke-width="1.5" opacity="0.9"/>
+  <line x1="50" y1="57.5" x2="50" y2="60" stroke="#ffffff" stroke-width="1.5" opacity="0.9"/>
+  <line x1="44.5" y1="52" x2="42" y2="52" stroke="#ffffff" stroke-width="1.5" opacity="0.9"/>
+  <line x1="55.5" y1="52" x2="58" y2="52" stroke="#ffffff" stroke-width="1.5" opacity="0.9"/>
+
+  <!-- Frame border -->
+  <rect x="8" y="12" width="84" height="64" rx="5" fill="none" stroke="rgba(126,200,227,0.25)" stroke-width="1"/>
+
+  <!-- Label strip -->
+  <rect x="8" y="80" width="84" height="14" rx="3" fill="#0d1b26"/>
+  <text x="50" y="90" text-anchor="middle" font-family="sans-serif" font-size="7" font-weight="700"
+        fill="#7EC8E3" letter-spacing="1">SAM · CLICK TO SEGMENT</text>
+</svg>
