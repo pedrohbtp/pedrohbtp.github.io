@@ -127,4 +127,13 @@
   {% include matomo.html %}
   {% endif %}
 
+  <!-- Apply saved theme before first paint to avoid flash -->
+  <script>
+    (function() {
+      var stored = localStorage.getItem('theme');
+      var theme = stored || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+
 </head>

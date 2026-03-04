@@ -1,5 +1,59 @@
 // Dean Attali / Beautiful Jekyll 2016
 
+/* --- Dark Mode --- */
+(function() {
+  var STORAGE_KEY = 'theme';
+  var toggle = null;
+
+  function getSystemPref() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (toggle) {
+      var icon = toggle.querySelector('.fa');
+      if (theme === 'dark') {
+        icon.classList.remove('fa-moon-o');
+        icon.classList.add('fa-sun-o');
+        toggle.setAttribute('aria-label', 'Switch to light mode');
+        toggle.setAttribute('title', 'Switch to light mode');
+      } else {
+        icon.classList.remove('fa-sun-o');
+        icon.classList.add('fa-moon-o');
+        toggle.setAttribute('aria-label', 'Switch to dark mode');
+        toggle.setAttribute('title', 'Switch to dark mode');
+      }
+    }
+  }
+
+  function initDarkMode() {
+    toggle = document.getElementById('dark-mode-toggle');
+    var stored = localStorage.getItem(STORAGE_KEY);
+    applyTheme(stored || getSystemPref());
+
+    if (toggle) {
+      toggle.addEventListener('click', function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(STORAGE_KEY, next);
+        applyTheme(next);
+      });
+    }
+
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        if (!localStorage.getItem(STORAGE_KEY)) {
+          applyTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initDarkMode);
+})();
+
 var main = {
 
   bigImgEl : null,
