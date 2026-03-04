@@ -5,51 +5,170 @@ subtitle: Watch the snake AI coming to life by playing the game by itself!
 
 use-site-title: true
 ---
-<script src="https://cdn.jsdelivr.net/npm/typeit@5.10.7/dist/typeit.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
 
-<div class="container" role="main">
-  <div class="row">
-    <div class="col-lg-8 col-lg col-md-10 col-md">
-      <div class="main-explain-area jumbotron">
-        <h3>Cheer for the snake AI as it plays the game!</h3>
-        <!-- <div id="text-spinner" class="spinner" style="display:none"> 
-          <div class="double-bounce1"></div>
-          <div class="double-bounce2"></div>
-        </div> -->
-        <p>
-          <br/>
-        </p>
-        <!-- <canvas id="snake" width="608" height="608"></canvas> -->
-        
-        <canvas id="snake" width="300" height="300"></canvas>
-        <!-- <span class="type-it"></span> -->
-        <div class="get-started-wrap">
-          <a class="btn btn-default btn-lg get-started-btn" onclick="init()">Reset</a>
-        </div>
-        <p>
-          <br/>
-        </p>
-        
-        AI runs on tensorflow and it was trained using Reinforcement learning techniques
-        using <a href="https://github.com/hill-a/stable-baselines"> stable-baselines. </a> 
-        The game interface is based on <a href="https://github.com/CodeExplainedRepo/Snake-JavaScript"> Snake-Javascript </a> 
+<style>
+  /* ── Page wrapper ── */
+  .snake-page {
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  /* ── Game card ── */
+  .snake-card {
+    background: #0F1923;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(126, 200, 227, 0.12);
+  }
+
+  /* ── Header bar ── */
+  .snake-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .snake-score-block {
+    line-height: 1;
+  }
+
+  .snake-score-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #90A4BE;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .snake-score-value {
+    font-size: 30px;
+    font-weight: 800;
+    color: #7EC8E3;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .snake-status {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .snake-status.running {
+    background: rgba(72, 187, 120, 0.15);
+    color: #68D391;
+  }
+
+  .snake-status.over {
+    background: rgba(245, 101, 101, 0.15);
+    color: #FC8181;
+  }
+
+  .snake-status.loading {
+    background: rgba(144, 164, 190, 0.15);
+    color: #90A4BE;
+  }
+
+  /* ── Canvas ── */
+  .snake-canvas-wrap {
+    line-height: 0;
+  }
+
+  .snake-canvas-wrap canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ── Footer bar ── */
+  .snake-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .btn-snake-reset {
+    background: #4A7FA5;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 28px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(74, 127, 165, 0.3);
+  }
+
+  .btn-snake-reset:hover {
+    background: #2B6CB0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(74, 127, 165, 0.45);
+  }
+
+  /* ── Credits ── */
+  .snake-credits {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #718096;
+    line-height: 1.7;
+    text-align: center;
+  }
+
+  .snake-credits a {
+    color: #4A7FA5;
+  }
+
+  .snake-credits a:hover {
+    color: #7EC8E3;
+  }
+</style>
+
+<div class="snake-page">
+
+  <div class="snake-card">
+
+    <!-- Header: score + status -->
+    <div class="snake-header">
+      <div class="snake-score-block">
+        <div class="snake-score-label">Score</div>
+        <div class="snake-score-value" id="snake-score">0</div>
       </div>
+      <span class="snake-status loading" id="snake-status">Loading…</span>
     </div>
+
+    <!-- Canvas -->
+    <div class="snake-canvas-wrap">
+      <canvas id="snake" width="380" height="380"></canvas>
+    </div>
+
+    <!-- Footer: reset button -->
+    <div class="snake-footer">
+      <button class="btn-snake-reset" onclick="init()">Reset</button>
+    </div>
+
   </div>
+
+  <p class="snake-credits">
+    AI trained with reinforcement learning via
+    <a href="https://github.com/hill-a/stable-baselines" target="_blank" rel="noopener">stable-baselines</a>.
+    Game interface based on
+    <a href="https://github.com/CodeExplainedRepo/Snake-JavaScript" target="_blank" rel="noopener">Snake-Javascript</a>.
+  </p>
+
 </div>
 
-
-
-  <!-- Function get the text -->
-  <script type="text/javascript" language="javascript">
-  
-  </script>
-<style>
-    canvas{
-        display: block;
-        margin: 0 auto;
-    }
-</style>
-  
 <script src="/js/snake.js"></script>
