@@ -1,0 +1,512 @@
+---
+layout: page
+title: Image Segmentation
+subtitle: Click any object in a photo to instantly isolate it — no server, no API calls.
+use-site-title: true
+---
+
+<script src="/js/segmentation.js"></script>
+
+<style>
+  /* ── Page wrapper ── */
+  .seg-page {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* ── Card ── */
+  .seg-card {
+    background: #0F1923;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(126, 200, 227, 0.12);
+  }
+
+  /* ── Header bar ── */
+  .seg-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .seg-title-block { line-height: 1.4; }
+
+  .seg-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #E2E8F0;
+    letter-spacing: 0.3px;
+  }
+
+  .seg-subtitle {
+    font-size: 11px;
+    color: #718096;
+  }
+
+  .seg-status {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    transition: background 0.3s ease, color 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .seg-status.idle {
+    background: rgba(144, 164, 190, 0.15);
+    color: #90A4BE;
+  }
+
+  .seg-status.loading {
+    background: rgba(246, 173, 85, 0.15);
+    color: #F6AD55;
+  }
+
+  .seg-status.ready {
+    background: rgba(72, 187, 120, 0.15);
+    color: #68D391;
+  }
+
+  .seg-status.processing {
+    background: rgba(126, 200, 227, 0.15);
+    color: #7EC8E3;
+  }
+
+  .seg-status.error {
+    background: rgba(252, 129, 129, 0.15);
+    color: #FC8181;
+  }
+
+  /* ── Progress bar ── */
+  .seg-progress-wrap {
+    padding: 0 20px 14px;
+    display: none;
+  }
+
+  .seg-progress-track {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .seg-progress-fill {
+    height: 100%;
+    background: #4A7FA5;
+    border-radius: 2px;
+    transition: width 0.2s ease;
+    width: 0%;
+  }
+
+  .seg-progress-label {
+    font-size: 10px;
+    color: #718096;
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* ── Upload area ── */
+  .seg-upload-wrap {
+    padding: 24px 20px;
+  }
+
+  .seg-upload-zone {
+    border: 2px dashed rgba(74, 127, 165, 0.4);
+    border-radius: 10px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .seg-upload-zone:hover,
+  .seg-upload-zone.drag-over {
+    border-color: #4A7FA5;
+    background: rgba(74, 127, 165, 0.08);
+  }
+
+  .seg-upload-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+
+  .seg-upload-text {
+    font-size: 14px;
+    color: #CBD5E0;
+    line-height: 1.6;
+  }
+
+  .seg-upload-link {
+    color: #4A7FA5;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .seg-upload-hint {
+    font-size: 11px;
+    color: #4A5568;
+    margin-top: 6px;
+  }
+
+  /* ── Canvas area ── */
+  .seg-canvas-wrap {
+    position: relative;
+    width: 100%;
+    line-height: 0;
+    cursor: crosshair;
+    display: none;
+  }
+
+  .seg-canvas-wrap canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  #mask-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+
+  /* Spinner overlay while processing */
+  .seg-spinner-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+  }
+
+  .seg-spinner-overlay.visible {
+    display: flex;
+  }
+
+  .seg-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: #7EC8E3;
+    border-radius: 50%;
+    animation: seg-spin 0.7s linear infinite;
+  }
+
+  @keyframes seg-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── Instruction hint ── */
+  .seg-hint {
+    padding: 10px 20px;
+    font-size: 12px;
+    color: #4A5568;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: none;
+  }
+
+  /* ── Controls ── */
+  .seg-controls {
+    display: none;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    flex-wrap: wrap;
+  }
+
+  .seg-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .seg-btn-clear {
+    background: rgba(252, 129, 129, 0.12);
+    color: #FC8181;
+    border: 1px solid rgba(252, 129, 129, 0.25);
+  }
+
+  .seg-btn-clear:hover {
+    background: rgba(252, 129, 129, 0.22);
+  }
+
+  .seg-btn-change {
+    background: rgba(255, 255, 255, 0.06);
+    color: #90A4BE;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .seg-btn-change:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #CBD5E0;
+  }
+
+  /* ── Credits ── */
+  .seg-credits {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #718096;
+    line-height: 1.7;
+    text-align: center;
+  }
+
+  .seg-credits a { color: #4A7FA5; }
+  .seg-credits a:hover { color: #7EC8E3; }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .seg-upload-zone { padding: 28px 16px; }
+    .seg-btn { padding: 8px 14px; font-size: 11px; }
+  }
+</style>
+
+<div class="seg-page">
+  <div class="seg-card">
+
+    <!-- Header -->
+    <div class="seg-header">
+      <div class="seg-title-block">
+        <div class="seg-title">Segment Anything (MobileSAM)</div>
+        <div class="seg-subtitle">Upload a photo, then click any object</div>
+      </div>
+      <span class="seg-status loading" id="seg-status">Loading…</span>
+    </div>
+
+    <!-- Progress bar (shown while model downloads) -->
+    <div class="seg-progress-wrap" id="seg-progress-wrap">
+      <div class="seg-progress-track">
+        <div class="seg-progress-fill" id="seg-progress-fill"></div>
+      </div>
+      <div class="seg-progress-label" id="seg-progress-label">Downloading model weights…</div>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="seg-upload-wrap" id="seg-upload-wrap">
+      <div class="seg-upload-zone" id="upload-zone">
+        <div class="seg-upload-icon">🖼️</div>
+        <div class="seg-upload-text">
+          Drop an image here or
+          <span class="seg-upload-link" id="upload-link">click to upload</span>
+        </div>
+        <div class="seg-upload-hint">JPEG · PNG · WebP — processed entirely in your browser</div>
+      </div>
+      <input type="file" id="file-input" accept="image/*" style="display:none">
+    </div>
+
+    <!-- Canvas (hidden until image loaded) -->
+    <div class="seg-canvas-wrap" id="seg-canvas-wrap">
+      <canvas id="img-canvas"></canvas>
+      <canvas id="mask-canvas"></canvas>
+      <div class="seg-spinner-overlay" id="spinner">
+        <div class="seg-spinner"></div>
+      </div>
+    </div>
+
+    <!-- Per-image hint -->
+    <div class="seg-hint" id="seg-hint">
+      Click anywhere on the image to segment an object — each click adds a new mask
+    </div>
+
+    <!-- Action buttons -->
+    <div class="seg-controls" id="seg-controls">
+      <button class="seg-btn seg-btn-clear" id="btn-clear">Clear masks</button>
+      <button class="seg-btn seg-btn-change" id="btn-change">Change image</button>
+    </div>
+
+  </div><!-- /.seg-card -->
+
+  <p class="seg-credits">
+    Powered by
+    <a href="https://huggingface.co/Xenova/mobile_sam" target="_blank" rel="noopener">MobileSAM</a>
+    running locally via
+    <a href="https://huggingface.co/docs/transformers.js" target="_blank" rel="noopener">Transformers.js</a>.
+    Model weights (~40 MB) are cached in your browser after the first load.
+  </p>
+</div><!-- /.seg-page -->
+
+<script>
+(function () {
+  'use strict';
+
+  // ── DOM refs ──────────────────────────────────────────────────────────────
+  var statusEl     = document.getElementById('seg-status');
+  var progressWrap = document.getElementById('seg-progress-wrap');
+  var progressFill = document.getElementById('seg-progress-fill');
+  var progressLbl  = document.getElementById('seg-progress-label');
+  var uploadWrap   = document.getElementById('seg-upload-wrap');
+  var uploadZone   = document.getElementById('upload-zone');
+  var uploadLink   = document.getElementById('upload-link');
+  var fileInput    = document.getElementById('file-input');
+  var canvasWrap   = document.getElementById('seg-canvas-wrap');
+  var imgCanvas    = document.getElementById('img-canvas');
+  var maskCanvas   = document.getElementById('mask-canvas');
+  var spinner      = document.getElementById('spinner');
+  var hint         = document.getElementById('seg-hint');
+  var controls     = document.getElementById('seg-controls');
+  var btnClear     = document.getElementById('btn-clear');
+  var btnChange    = document.getElementById('btn-change');
+
+  var imgCtx  = imgCanvas.getContext('2d');
+  var imgData = null;   // The loaded HTMLImageElement
+
+  // ── Status helpers ────────────────────────────────────────────────────────
+  function setStatus(type, text) {
+    statusEl.className   = 'seg-status ' + type;
+    statusEl.textContent = text;
+  }
+
+  function showProgress(pct, label) {
+    progressWrap.style.display = 'block';
+    progressFill.style.width   = pct + '%';
+    progressLbl.textContent    = label || '';
+  }
+
+  function hideProgress() {
+    progressWrap.style.display = 'none';
+  }
+
+  // ── Load model ────────────────────────────────────────────────────────────
+  initModel(function (info) {
+    if (info.status === 'progress' && info.progress !== undefined) {
+      var pct  = Math.round(info.progress);
+      var file = info.file ? info.file.split('/').pop() : 'weights';
+      showProgress(pct, 'Downloading ' + file + '… ' + pct + '%');
+      setStatus('loading', pct + '%');
+    } else if (info.status === 'initiate') {
+      setStatus('loading', 'Initialising…');
+    } else if (info.status === 'done') {
+      setStatus('loading', 'Finalising…');
+    }
+  }).then(function () {
+    hideProgress();
+    setStatus('ready', 'Ready');
+  }).catch(function (err) {
+    hideProgress();
+    setStatus('error', 'Load failed');
+    console.error('SAM model load error:', err);
+  });
+
+  // ── File upload ───────────────────────────────────────────────────────────
+  uploadZone.addEventListener('click', function () { fileInput.click(); });
+  uploadLink.addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
+
+  uploadZone.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+  });
+
+  uploadZone.addEventListener('dragleave', function () {
+    uploadZone.classList.remove('drag-over');
+  });
+
+  uploadZone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    var file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) loadImage(file);
+  });
+
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files[0]) loadImage(fileInput.files[0]);
+    // Reset so the same file can be re-selected
+    fileInput.value = '';
+  });
+
+  function loadImage(file) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var img = new Image();
+      img.onload = function () {
+        imgData = img;
+        renderImage(img);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function renderImage(img) {
+    // Cap width at 1024 px for performance
+    var maxW   = 1024;
+    var scale  = img.width > maxW ? maxW / img.width : 1;
+    var w      = Math.round(img.width  * scale);
+    var h      = Math.round(img.height * scale);
+
+    imgCanvas.width   = w;
+    imgCanvas.height  = h;
+    maskCanvas.width  = w;
+    maskCanvas.height = h;
+
+    imgCtx.drawImage(img, 0, 0, w, h);
+    maskCanvas.getContext('2d').clearRect(0, 0, w, h);
+    resetMaskCount();
+
+    uploadWrap.style.display = 'none';
+    canvasWrap.style.display = 'block';
+    hint.style.display       = 'block';
+    controls.style.display   = 'flex';
+  }
+
+  // ── Canvas click → segmentation ───────────────────────────────────────────
+  imgCanvas.addEventListener('click', function (e) {
+    if (!isModelReady() || isBusy()) return;
+
+    var rect   = imgCanvas.getBoundingClientRect();
+    var scaleX = imgCanvas.width  / rect.width;
+    var scaleY = imgCanvas.height / rect.height;
+    var cx     = (e.clientX - rect.left)  * scaleX;
+    var cy     = (e.clientY - rect.top)   * scaleY;
+
+    spinner.classList.add('visible');
+    setStatus('processing', 'Segmenting…');
+
+    runSegmentation(imgCanvas, cx, cy, maskCanvas).then(function (ok) {
+      spinner.classList.remove('visible');
+      setStatus('ready', 'Ready');
+      if (!ok) console.warn('Segmentation skipped (model busy or not ready)');
+    }).catch(function (err) {
+      spinner.classList.remove('visible');
+      setStatus('error', 'Error');
+      console.error('Segmentation error:', err);
+    });
+  });
+
+  // ── Keyboard shortcut: Escape clears masks ────────────────────────────────
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') clearMasks();
+  });
+
+  // ── Buttons ───────────────────────────────────────────────────────────────
+  btnClear.addEventListener('click', clearMasks);
+
+  btnChange.addEventListener('click', function () {
+    canvasWrap.style.display = 'none';
+    hint.style.display       = 'none';
+    controls.style.display   = 'none';
+    uploadWrap.style.display = 'block';
+    imgData = null;
+  });
+
+  function clearMasks() {
+    if (!maskCanvas) return;
+    maskCanvas.getContext('2d').clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+    resetMaskCount();
+  }
+
+}());
+</script>
