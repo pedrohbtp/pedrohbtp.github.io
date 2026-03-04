@@ -1,0 +1,391 @@
+---
+layout: page
+title: Local AI Chat
+subtitle: Talk with a small language model running entirely in your browser — no data leaves your device.
+
+use-site-title: true
+---
+
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+      <!-- Status bar -->
+      <div id="status-bar" class="chat-status chat-status--loading">
+        <span id="status-icon" aria-hidden="true">⏳</span>
+        <span id="status-text">Loading model — first load may take a minute while weights download…</span>
+        <span id="progress-pct"></span>
+      </div>
+
+      <!-- Chat window -->
+      <div id="chat-window" class="chat-window" aria-live="polite" aria-label="Chat messages">
+        <div id="messages" class="chat-messages">
+          <div class="chat-msg chat-msg--assistant">
+            <div class="chat-bubble">
+              Hi! I'm SmolLM2 — a tiny language model running locally in your browser.
+              Ask me anything once the model finishes loading!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input area -->
+      <form id="chat-form" class="chat-input-area" onsubmit="return false;">
+        <textarea
+          id="user-input"
+          class="chat-input"
+          placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
+          rows="2"
+          disabled
+          aria-label="Your message"
+        ></textarea>
+        <button
+          id="send-btn"
+          type="submit"
+          class="btn chat-send-btn"
+          disabled
+          aria-label="Send message"
+        >
+          <i class="fa fa-paper-plane" aria-hidden="true"></i> Send
+        </button>
+      </form>
+
+      <p class="chat-note">
+        Model: <a href="https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct" target="_blank" rel="noopener">SmolLM2-135M-Instruct</a>
+        &mdash; powered by <a href="https://huggingface.co/docs/transformers.js" target="_blank" rel="noopener">Transformers.js</a>.
+        Weights are cached in your browser after the first load.
+      </p>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Status bar ── */
+  .chat-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s, color 0.3s;
+  }
+  .chat-status--loading {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+  }
+  .chat-status--ready {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #34d399;
+  }
+  .chat-status--error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+  }
+  #progress-pct {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Chat window ── */
+  .chat-window {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    height: 420px;
+    overflow-y: auto;
+    padding: 16px;
+    margin-bottom: 12px;
+    scroll-behavior: smooth;
+  }
+  .chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ── Messages ── */
+  .chat-msg {
+    display: flex;
+  }
+  .chat-msg--user   { justify-content: flex-end; }
+  .chat-msg--assistant { justify-content: flex-start; }
+
+  .chat-bubble {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .chat-msg--user .chat-bubble {
+    background: #1D2B3A;
+    color: #fff;
+    border-bottom-right-radius: 2px;
+  }
+  .chat-msg--assistant .chat-bubble {
+    background: #fff;
+    color: #1a202c;
+    border: 1px solid #e2e8f0;
+    border-bottom-left-radius: 2px;
+  }
+
+  /* ── Typing indicator ── */
+  .typing-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 2px 0;
+  }
+  .typing-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #94a3b8;
+    animation: dot-bounce 1.2s infinite ease-in-out;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-bounce {
+    0%, 80%, 100% { transform: translateY(0);   opacity: 0.45; }
+    40%            { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* ── Input area ── */
+  .chat-input-area {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    margin-bottom: 8px;
+  }
+  .chat-input {
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #fff;
+  }
+  .chat-input:focus {
+    outline: none;
+    border-color: #4A7FA5;
+    box-shadow: 0 0 0 3px rgba(74,127,165,0.15);
+  }
+  .chat-input:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+  }
+  .chat-send-btn {
+    white-space: nowrap;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: #1D2B3A;
+    border: 1px solid #1D2B3A;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    line-height: 1.5;
+  }
+  .chat-send-btn:hover:not(:disabled) {
+    background: #2B6CB0;
+    border-color: #2B6CB0;
+  }
+  .chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ── Footer note ── */
+  .chat-note {
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
+    margin-top: 4px;
+  }
+  .chat-note a { color: #4A7FA5; }
+</style>
+
+<script type="module">
+  import { pipeline, TextStreamer } from
+    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/dist/transformers.min.js';
+
+  // ── Constants ──────────────────────────────────────────────────────────────
+  const MODEL_ID = 'HuggingFaceTB/SmolLM2-135M-Instruct';
+  const SYSTEM_PROMPT = 'You are a helpful, concise assistant. Keep answers short and clear.';
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let generator = null;
+  let isGenerating = false;
+  let conversationHistory = [{ role: 'system', content: SYSTEM_PROMPT }];
+
+  // ── DOM refs ───────────────────────────────────────────────────────────────
+  const statusBar  = document.getElementById('status-bar');
+  const statusIcon = document.getElementById('status-icon');
+  const statusText = document.getElementById('status-text');
+  const progressEl = document.getElementById('progress-pct');
+  const messagesEl = document.getElementById('messages');
+  const chatWindow = document.getElementById('chat-window');
+  const userInput  = document.getElementById('user-input');
+  const sendBtn    = document.getElementById('send-btn');
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function setStatus(type, text, icon, pct) {
+    statusBar.className = 'chat-status chat-status--' + type;
+    statusIcon.textContent = icon;
+    statusText.textContent = text;
+    progressEl.textContent = pct !== undefined ? pct + '%' : '';
+  }
+
+  function scrollBottom() {
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+
+  function appendMessage(role, content) {
+    const wrap   = document.createElement('div');
+    wrap.className = 'chat-msg chat-msg--' + role;
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = content;
+    wrap.appendChild(bubble);
+    messagesEl.appendChild(wrap);
+    scrollBottom();
+    return bubble;
+  }
+
+  function showTyping() {
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-msg chat-msg--assistant';
+    wrap.id = 'typing-indicator';
+    wrap.innerHTML =
+      '<div class="chat-bubble"><div class="typing-dots">' +
+      '<div class="typing-dot"></div>' +
+      '<div class="typing-dot"></div>' +
+      '<div class="typing-dot"></div>' +
+      '</div></div>';
+    messagesEl.appendChild(wrap);
+    scrollBottom();
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typing-indicator');
+    if (el) el.remove();
+  }
+
+  function setInputEnabled(enabled) {
+    userInput.disabled = !enabled;
+    sendBtn.disabled   = !enabled;
+    if (enabled) userInput.focus();
+  }
+
+  // ── Load model ─────────────────────────────────────────────────────────────
+  async function loadModel() {
+    const opts = {
+      dtype: 'q4',
+      progress_callback: ({ status, progress, file }) => {
+        if (status === 'progress' && progress !== undefined) {
+          setStatus('loading',
+            'Downloading — ' + (file || 'model weights') + '…',
+            '⏳',
+            Math.round(progress));
+        } else if (status === 'initiate') {
+          setStatus('loading', 'Initialising model…', '⏳');
+        } else if (status === 'done') {
+          setStatus('loading', 'Finalising…', '⏳');
+        }
+      },
+    };
+
+    try {
+      // Try WebGPU first (faster on supported browsers)
+      generator = await pipeline('text-generation', MODEL_ID, { ...opts, device: 'webgpu' });
+    } catch {
+      // Fall back to WASM (works everywhere)
+      generator = await pipeline('text-generation', MODEL_ID, opts);
+    }
+
+    setStatus('ready', 'Model ready — running 100% locally in your browser', '✅');
+    setInputEnabled(true);
+  }
+
+  // ── Send message ───────────────────────────────────────────────────────────
+  async function sendMessage() {
+    const text = userInput.value.trim();
+    if (!text || isGenerating || !generator) return;
+
+    isGenerating = true;
+    setInputEnabled(false);
+    userInput.value = '';
+
+    conversationHistory.push({ role: 'user', content: text });
+    appendMessage('user', text);
+    showTyping();
+
+    let assistantBubble = null;
+    let fullResponse    = '';
+
+    try {
+      const streamer = new TextStreamer(generator.tokenizer, {
+        skip_prompt: true,
+        skip_special_tokens: true,
+        callback_function: (token) => {
+          if (!assistantBubble) {
+            removeTyping();
+            assistantBubble = appendMessage('assistant', '');
+          }
+          fullResponse += token;
+          assistantBubble.textContent = fullResponse;
+          scrollBottom();
+        },
+      });
+
+      await generator(conversationHistory, {
+        max_new_tokens: 256,
+        temperature: 0.7,
+        top_p: 0.9,
+        do_sample: true,
+        streamer,
+      });
+
+      // If streamer never fired (empty response), remove the typing indicator
+      removeTyping();
+      if (!fullResponse) appendMessage('assistant', '(no response)');
+
+      conversationHistory.push({ role: 'assistant', content: fullResponse });
+    } catch (err) {
+      removeTyping();
+      appendMessage('assistant', 'Error: ' + err.message);
+      console.error(err);
+    }
+
+    isGenerating = false;
+    setInputEnabled(true);
+  }
+
+  // ── Event listeners ────────────────────────────────────────────────────────
+  document.getElementById('chat-form').addEventListener('submit', sendMessage);
+
+  userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // ── Boot ───────────────────────────────────────────────────────────────────
+  loadModel().catch((err) => {
+    setStatus('error', 'Failed to load model: ' + err.message, '❌');
+    console.error(err);
+  });
+</script>
