@@ -1232,6 +1232,116 @@ td.gutter {
   border-color: #FED7D7;
 }
 
+/* --- Dark Mode --- */
+
+[data-theme="dark"] {
+  --color-bg: #0F1117;
+  --color-text: #E2E8F0;
+  --color-text-muted: #8FA3B8;
+  --color-link: #63B3ED;
+  --color-link-hover: #90CDF4;
+  --color-navbar: #0D1625;
+  --color-navbar-text: #CBD5E0;
+  --color-footer: #0D1625;
+  --color-border: #2D3748;
+  --color-card-bg: #1A2233;
+  --color-card-shadow: rgba(0, 0, 0, 0.35);
+  --color-card-shadow-hover: rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="dark"] .jumbotron {
+  background-color: #1A2233;
+  border-color: #2D3748;
+}
+
+[data-theme="dark"] .skill-pill,
+[data-theme="dark"] .item-tag {
+  background-color: #1E2D42;
+  color: #A0B8D0;
+}
+
+[data-theme="dark"] .list-circles-item .item-link {
+  background-color: #1E2D42;
+  color: #CBD5E0;
+}
+
+[data-theme="dark"] .pager li a {
+  background-color: #1A2233;
+  color: #E2E8F0;
+  border-color: #2D3748;
+}
+
+[data-theme="dark"] table tr {
+  background-color: #1A2233;
+}
+
+[data-theme="dark"] table tr:nth-child(2n) {
+  background-color: #152030;
+}
+
+[data-theme="dark"] table tr th {
+  background-color: #152030;
+}
+
+[data-theme="dark"] pre.highlight,
+[data-theme="dark"] .highlight > pre,
+[data-theme="dark"] td.code pre {
+  background-color: #152030;
+  background-image: linear-gradient(#112240 50%, #152030 50%);
+}
+
+[data-theme="dark"] code table,
+[data-theme="dark"] code table td,
+[data-theme="dark"] code table th,
+[data-theme="dark"] code table tbody,
+[data-theme="dark"] code table tr,
+[data-theme="dark"] td.gutter pre {
+  background-color: #1A2233;
+}
+
+[data-theme="dark"] .blog-tags a {
+  background-color: #1E2D42;
+}
+
+[data-theme="dark"] .header-section.has-img .no-img {
+  background-color: #152030;
+}
+
+[data-theme="dark"] .box-note {
+  background-color: #1A2B3C;
+  border-color: #2C5282;
+}
+
+[data-theme="dark"] .box-warning {
+  background-color: #2D2A1A;
+  border-color: #744210;
+}
+
+[data-theme="dark"] .box-error {
+  background-color: #2D1A1A;
+  border-color: #742A2A;
+}
+
+/* Dark mode toggle button */
+#dark-mode-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-navbar-text);
+  font-size: 16px;
+  padding: 10px 12px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition), opacity var(--transition);
+  opacity: 0.85;
+}
+
+#dark-mode-toggle:hover {
+  color: #fff;
+  opacity: 1;
+}
+
 /* --- Fix table border for gist snippets --- */
 
 .gist, .gist-file table tr {
