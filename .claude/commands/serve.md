@@ -9,13 +9,13 @@ Dependencies must be installed first. Run `/install` if you haven't already.
 ## Start the server
 
 ```bash
-JEKYLL_NO_BUNDLER_REQUIRE=true \
-  /opt/rbenv/versions/3.3.6/bin/jekyll serve \
+RUBYOPT="-E utf-8" \
+  bundle exec jekyll serve \
   --port 4000 \
   --destination /home/user/jekyll_site
 ```
 
-- `JEKYLL_NO_BUNDLER_REQUIRE=true` — skips Bundler (Gemfile.lock is incompatible with Ruby 3.3)
+- `RUBYOPT="-E utf-8"` — sets UTF-8 encoding so the Sass converter handles non-ASCII characters in theme gems
 - `--destination /home/user/jekyll_site` — writes the built site outside the repo to avoid polluting it
 
 The server auto-regenerates on file changes. Visit http://localhost:4000 in your browser.
