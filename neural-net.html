@@ -1,0 +1,706 @@
+---
+layout: page
+title: Train Your Own AI
+subtitle: Place dots. Watch a neural net learn.
+use-site-title: true
+---
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
+
+<style>
+  /* ── Page wrapper ── */
+  .nn-page {
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── Card ── */
+  .nn-card {
+    background: #0F1923;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(126, 200, 227, 0.12);
+  }
+
+  /* ── Header bar ── */
+  .nn-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .nn-title-block {
+    line-height: 1.4;
+  }
+
+  .nn-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #E2E8F0;
+    letter-spacing: 0.3px;
+  }
+
+  .nn-subtitle {
+    font-size: 11px;
+    color: #718096;
+  }
+
+  .nn-status {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 999px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .nn-status.idle {
+    background: rgba(144, 164, 190, 0.15);
+    color: #90A4BE;
+  }
+
+  .nn-status.training {
+    background: rgba(246, 173, 85, 0.15);
+    color: #F6AD55;
+  }
+
+  .nn-status.ready {
+    background: rgba(72, 187, 120, 0.15);
+    color: #68D391;
+  }
+
+  /* ── Canvas container ── */
+  .nn-canvas-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    cursor: crosshair;
+    line-height: 0;
+    background: #111827;
+  }
+
+  .nn-canvas-wrap canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  #dot-canvas {
+    z-index: 1;
+  }
+
+  .nn-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(255, 255, 255, 0.28);
+    font-size: 14px;
+    text-align: center;
+    pointer-events: none;
+    z-index: 2;
+    line-height: 1.8;
+  }
+
+  /* ── Stats bar ── */
+  .nn-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 10px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .nn-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 40px;
+  }
+
+  .nn-stat-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #718096;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .nn-stat-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #7EC8E3;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .nn-stat-divider {
+    width: 1px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+  }
+
+  .nn-sparkline-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  #sparkline-canvas {
+    position: static;
+    width: 80px !important;
+    height: 32px !important;
+    border-radius: 4px;
+    opacity: 0.85;
+  }
+
+  /* ── Controls ── */
+  .nn-controls {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nn-ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nn-ctrl-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #718096;
+    font-weight: 600;
+    min-width: 90px;
+  }
+
+  .nn-seg {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .nn-seg button {
+    background: transparent;
+    border: none;
+    color: #90A4BE;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 11px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .nn-seg button:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #E2E8F0;
+  }
+
+  .nn-seg button.active {
+    background: #4A7FA5;
+    color: #fff;
+  }
+
+  /* ── Dot class selector + reset ── */
+  .nn-dot-row {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    align-items: center;
+  }
+
+  .nn-dot-btn {
+    flex: 1;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 10px 0;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease,
+                background 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .nn-dot-btn .dot-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .nn-dot-btn.red {
+    background: rgba(252, 129, 129, 0.1);
+    color: #FC8181;
+    border-color: rgba(252, 129, 129, 0.2);
+  }
+
+  .nn-dot-btn.blue {
+    background: rgba(99, 179, 237, 0.1);
+    color: #63B3ED;
+    border-color: rgba(99, 179, 237, 0.2);
+  }
+
+  .nn-dot-btn.active.red {
+    background: rgba(252, 129, 129, 0.25);
+    border-color: #FC8181;
+    box-shadow: 0 0 14px rgba(252, 129, 129, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .nn-dot-btn.active.blue {
+    background: rgba(99, 179, 237, 0.25);
+    border-color: #63B3ED;
+    box-shadow: 0 0 14px rgba(99, 179, 237, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .nn-btn-reset {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #718096;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .nn-btn-reset:hover {
+    border-color: #FC8181;
+    color: #FC8181;
+  }
+
+  /* ── Credits ── */
+  .nn-credits {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #718096;
+    line-height: 1.7;
+    text-align: center;
+  }
+
+  .nn-credits a {
+    color: #4A7FA5;
+  }
+
+  .nn-credits a:hover {
+    color: #7EC8E3;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .nn-ctrl-label { min-width: 72px; font-size: 9px; }
+    .nn-seg button { padding: 5px 8px; font-size: 11px; }
+    .nn-stat-value { font-size: 13px; }
+    .nn-stats { gap: 2px; padding: 8px; }
+  }
+</style>
+
+<div class="nn-page">
+  <div class="nn-card">
+
+    <!-- Header -->
+    <div class="nn-header">
+      <div class="nn-title-block">
+        <div class="nn-title">Neural Net Trainer</div>
+        <div class="nn-subtitle">Click the grid to place dots</div>
+      </div>
+      <span class="nn-status idle" id="nn-status">Waiting</span>
+    </div>
+
+    <!-- Canvas area -->
+    <div class="nn-canvas-wrap" id="nn-canvas-wrap">
+      <canvas id="heatmap-canvas" width="400" height="400"></canvas>
+      <canvas id="dot-canvas" width="400" height="400"></canvas>
+      <div class="nn-hint" id="nn-hint">
+        Place a <span style="color:#FC8181">red</span> dot and a <span style="color:#63B3ED">blue</span> dot<br>to start training
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="nn-stats">
+      <div class="nn-stat">
+        <div class="nn-stat-label">Epoch</div>
+        <div class="nn-stat-value" id="stat-epoch">—</div>
+      </div>
+      <div class="nn-stat-divider"></div>
+      <div class="nn-stat">
+        <div class="nn-stat-label">Loss</div>
+        <div class="nn-stat-value" id="stat-loss">—</div>
+      </div>
+      <div class="nn-stat-divider"></div>
+      <div class="nn-stat">
+        <div class="nn-stat-label">Accuracy</div>
+        <div class="nn-stat-value" id="stat-acc">—</div>
+      </div>
+      <div class="nn-stat-divider"></div>
+      <div class="nn-stat">
+        <div class="nn-stat-label">Dots</div>
+        <div class="nn-stat-value" id="stat-dots">0</div>
+      </div>
+      <div class="nn-stat-divider"></div>
+      <div class="nn-sparkline-wrap">
+        <div class="nn-stat-label">Loss curve</div>
+        <canvas id="sparkline-canvas" width="80" height="32"></canvas>
+      </div>
+    </div>
+
+    <!-- Architecture controls -->
+    <div class="nn-controls">
+      <div class="nn-ctrl-row">
+        <span class="nn-ctrl-label">Hidden layers</span>
+        <div class="nn-seg" id="seg-layers">
+          <button class="active" data-val="1">1</button>
+          <button data-val="2">2</button>
+          <button data-val="3">3</button>
+        </div>
+      </div>
+      <div class="nn-ctrl-row">
+        <span class="nn-ctrl-label">Neurons/layer</span>
+        <div class="nn-seg" id="seg-neurons">
+          <button data-val="2">2</button>
+          <button data-val="4">4</button>
+          <button class="active" data-val="8">8</button>
+          <button data-val="16">16</button>
+        </div>
+      </div>
+      <div class="nn-ctrl-row">
+        <span class="nn-ctrl-label">Activation</span>
+        <div class="nn-seg" id="seg-activation">
+          <button class="active" data-val="relu">ReLU</button>
+          <button data-val="sigmoid">Sigmoid</button>
+          <button data-val="tanh">Tanh</button>
+        </div>
+      </div>
+      <div class="nn-ctrl-row">
+        <span class="nn-ctrl-label">Speed</span>
+        <div class="nn-seg" id="seg-speed">
+          <button data-val="slow">Slow</button>
+          <button class="active" data-val="fast">Fast</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dot selector + reset -->
+    <div class="nn-dot-row">
+      <button class="nn-dot-btn red active" id="btn-red" onclick="nnSelectClass(0)">
+        <span class="dot-swatch" style="background:#FC8181"></span>Red
+      </button>
+      <button class="nn-dot-btn blue" id="btn-blue" onclick="nnSelectClass(1)">
+        <span class="dot-swatch" style="background:#63B3ED"></span>Blue
+      </button>
+      <button class="nn-btn-reset" onclick="nnReset()">Reset</button>
+    </div>
+
+  </div><!-- /.nn-card -->
+
+  <p class="nn-credits">
+    Tiny MLP trained live in your browser via
+    <a href="https://www.tensorflow.org/js" target="_blank" rel="noopener">TensorFlow.js</a>.
+    Inspired by
+    <a href="https://playground.tensorflow.org" target="_blank" rel="noopener">TF Playground</a>.
+  </p>
+</div><!-- /.nn-page -->
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Constants ── */
+  var CANVAS_SIZE = 400;
+  var GRID        = 50;
+  var CELL        = CANVAS_SIZE / GRID;
+  var RED_COLOR   = [252, 129, 129];
+  var BLUE_COLOR  = [99,  179, 237];
+
+  /* ── State ── */
+  var dots        = [];
+  var activeClass = 0;
+  var numLayers   = 1;
+  var neurons     = 8;
+  var activation  = 'relu';
+  var fastMode    = true;
+  var model       = null;
+  var isTraining  = false;
+  var pendingRetrain = false;
+  var lossHistory = [];
+
+  /* ── Canvas refs ── */
+  var heatmapCanvas = document.getElementById('heatmap-canvas');
+  var dotCanvas     = document.getElementById('dot-canvas');
+  var sparkCanvas   = document.getElementById('sparkline-canvas');
+  var hCtx = heatmapCanvas.getContext('2d');
+  var dCtx = dotCanvas.getContext('2d');
+  var sCtx = sparkCanvas.getContext('2d');
+
+  /* ── UI refs ── */
+  var statusEl = document.getElementById('nn-status');
+  var hintEl   = document.getElementById('nn-hint');
+  var epochEl  = document.getElementById('stat-epoch');
+  var lossEl   = document.getElementById('stat-loss');
+  var accEl    = document.getElementById('stat-acc');
+  var dotsEl   = document.getElementById('stat-dots');
+
+  /* ── Initial empty grid ── */
+  drawEmptyGrid();
+
+  /* ── Click: place dot ── */
+  dotCanvas.addEventListener('click', function (e) {
+    var rect   = dotCanvas.getBoundingClientRect();
+    var scaleX = CANVAS_SIZE / rect.width;
+    var scaleY = CANVAS_SIZE / rect.height;
+    var px = (e.clientX - rect.left) * scaleX;
+    var py = (e.clientY - rect.top)  * scaleY;
+    dots.push({ x: px, y: py, label: activeClass });
+    dotsEl.textContent = dots.length;
+    drawDots();
+    scheduleRetrain();
+  });
+
+  /* ── Exposed globals (onclick attrs) ── */
+  window.nnSelectClass = function (cls) {
+    activeClass = cls;
+    document.getElementById('btn-red').classList.toggle('active', cls === 0);
+    document.getElementById('btn-blue').classList.toggle('active', cls === 1);
+  };
+
+  window.nnReset = function () {
+    dots        = [];
+    lossHistory = [];
+    isTraining  = false;
+    pendingRetrain = false;
+    if (model) { model.dispose(); model = null; }
+    hCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    dCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    sCtx.clearRect(0, 0, 80, 32);
+    drawEmptyGrid();
+    hintEl.style.display   = '';
+    statusEl.className     = 'nn-status idle';
+    statusEl.textContent   = 'Waiting';
+    epochEl.textContent    = '—';
+    lossEl.textContent     = '—';
+    accEl.textContent      = '—';
+    dotsEl.textContent     = '0';
+  };
+
+  /* ── Segmented controls ── */
+  function initSeg(id, setter) {
+    document.getElementById(id).addEventListener('click', function (e) {
+      var btn = e.target.closest('button');
+      if (!btn) return;
+      this.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      setter(btn.dataset.val);
+      scheduleRetrain();
+    });
+  }
+
+  initSeg('seg-layers',     function (v) { numLayers  = parseInt(v, 10); });
+  initSeg('seg-neurons',    function (v) { neurons    = parseInt(v, 10); });
+  initSeg('seg-activation', function (v) { activation = v; });
+  initSeg('seg-speed',      function (v) { fastMode   = (v === 'fast'); });
+
+  /* ── Training orchestration ── */
+  function scheduleRetrain() {
+    if (isTraining) { pendingRetrain = true; return; }
+    retrain();
+  }
+
+  async function retrain() {
+    var redDots  = dots.filter(function (d) { return d.label === 0; });
+    var blueDots = dots.filter(function (d) { return d.label === 1; });
+    if (redDots.length === 0 || blueDots.length === 0) return;
+
+    hintEl.style.display = 'none';
+    isTraining     = true;
+    pendingRetrain = false;
+    lossHistory    = [];
+
+    statusEl.className   = 'nn-status training';
+    statusEl.textContent = 'Training';
+
+    if (model) { model.dispose(); model = null; }
+
+    /* Build model */
+    model = tf.sequential();
+    model.add(tf.layers.dense({ inputShape: [2], units: neurons, activation: activation }));
+    for (var i = 1; i < numLayers; i++) {
+      model.add(tf.layers.dense({ units: neurons, activation: activation }));
+    }
+    model.add(tf.layers.dense({ units: 1, activation: 'sigmoid' }));
+    model.compile({
+      optimizer: tf.train.adam(0.05),
+      loss: 'binaryCrossentropy',
+      metrics: ['accuracy']
+    });
+
+    /* Build tensors */
+    var xs = tf.tensor2d(dots.map(function (d) { return [d.x / CANVAS_SIZE, d.y / CANVAS_SIZE]; }));
+    var ys = tf.tensor2d(dots.map(function (d) { return [d.label]; }), [dots.length, 1]);
+
+    var totalEpochs   = fastMode ? 300 : 150;
+    var heatmapEvery  = fastMode ? 8 : 1;
+
+    await model.fit(xs, ys, {
+      epochs: totalEpochs,
+      callbacks: {
+        onEpochEnd: async function (epoch, logs) {
+          lossHistory.push(logs.loss);
+          if (lossHistory.length > 100) lossHistory.shift();
+
+          var isLast = (epoch === totalEpochs - 1);
+          if ((epoch + 1) % heatmapEvery === 0 || isLast) {
+            epochEl.textContent = epoch + 1;
+            lossEl.textContent  = logs.loss.toFixed(3);
+            var rawAcc = logs.acc !== undefined ? logs.acc : (logs.accuracy !== undefined ? logs.accuracy : 0);
+            accEl.textContent   = Math.round(rawAcc * 100) + '%';
+            await drawHeatmap();
+            drawSparkline();
+            await tf.nextFrame();
+          }
+        }
+      }
+    });
+
+    xs.dispose();
+    ys.dispose();
+
+    statusEl.className   = 'nn-status ready';
+    statusEl.textContent = 'Ready';
+    isTraining = false;
+
+    if (pendingRetrain) {
+      pendingRetrain = false;
+      retrain();
+    }
+  }
+
+  /* ── Heatmap ── */
+  async function drawHeatmap() {
+    if (!model) return;
+
+    var coords = [];
+    for (var r = 0; r < GRID; r++) {
+      for (var c = 0; c < GRID; c++) {
+        coords.push([(c + 0.5) / GRID, (r + 0.5) / GRID]);
+      }
+    }
+
+    var xs    = tf.tensor2d(coords);
+    var preds = model.predict(xs);
+    var data  = await preds.data();
+    xs.dispose();
+    preds.dispose();
+
+    for (var r2 = 0; r2 < GRID; r2++) {
+      for (var c2 = 0; c2 < GRID; c2++) {
+        var p     = data[r2 * GRID + c2];
+        var alpha = 0.12 + 0.65 * Math.abs(p - 0.5) * 2;
+        var col   = p > 0.5 ? BLUE_COLOR : RED_COLOR;
+        hCtx.fillStyle = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',' + alpha + ')';
+        hCtx.fillRect(c2 * CELL, r2 * CELL, CELL, CELL);
+      }
+    }
+
+    /* Faint grid lines over heatmap */
+    hCtx.strokeStyle = 'rgba(255,255,255,0.03)';
+    hCtx.lineWidth   = 0.5;
+    for (var i = 0; i <= GRID; i++) {
+      hCtx.beginPath();
+      hCtx.moveTo(i * CELL, 0);
+      hCtx.lineTo(i * CELL, CANVAS_SIZE);
+      hCtx.stroke();
+      hCtx.beginPath();
+      hCtx.moveTo(0, i * CELL);
+      hCtx.lineTo(CANVAS_SIZE, i * CELL);
+      hCtx.stroke();
+    }
+  }
+
+  /* ── Dots ── */
+  function drawDots() {
+    dCtx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    for (var i = 0; i < dots.length; i++) {
+      var d = dots[i];
+      dCtx.beginPath();
+      dCtx.arc(d.x, d.y, 7, 0, Math.PI * 2);
+      dCtx.fillStyle   = d.label === 0 ? '#FC8181' : '#63B3ED';
+      dCtx.strokeStyle = '#fff';
+      dCtx.lineWidth   = 2;
+      dCtx.fill();
+      dCtx.stroke();
+    }
+  }
+
+  /* ── Sparkline ── */
+  function drawSparkline() {
+    var w = 80, h = 32;
+    sCtx.clearRect(0, 0, w, h);
+    if (lossHistory.length < 2) return;
+
+    var max   = Math.max.apply(null, lossHistory);
+    var min   = Math.min.apply(null, lossHistory);
+    var range = max - min || 1;
+
+    sCtx.beginPath();
+    sCtx.strokeStyle = '#F6AD55';
+    sCtx.lineWidth   = 1.5;
+    sCtx.lineJoin    = 'round';
+
+    for (var i = 0; i < lossHistory.length; i++) {
+      var x = (i / (lossHistory.length - 1)) * w;
+      var y = h - ((lossHistory[i] - min) / range) * (h - 4) - 2;
+      if (i === 0) { sCtx.moveTo(x, y); } else { sCtx.lineTo(x, y); }
+    }
+    sCtx.stroke();
+  }
+
+  /* ── Initial empty grid ── */
+  function drawEmptyGrid() {
+    hCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+    hCtx.lineWidth   = 0.5;
+    for (var i = 0; i <= GRID; i++) {
+      hCtx.beginPath();
+      hCtx.moveTo(i * CELL, 0);
+      hCtx.lineTo(i * CELL, CANVAS_SIZE);
+      hCtx.stroke();
+      hCtx.beginPath();
+      hCtx.moveTo(0, i * CELL);
+      hCtx.lineTo(CANVAS_SIZE, i * CELL);
+      hCtx.stroke();
+    }
+  }
+
+}());
+</script>
