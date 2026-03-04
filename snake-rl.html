@@ -1,20 +1,70 @@
 ---
 layout: page
 title: Snake Game AI
-subtitle: Watch the snake AI coming to life by playing the game by itself!
+subtitle: Watch the snake AI play — or continue training it yourself in your browser!
 
 use-site-title: true
 ---
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>
 
 <style>
-  /* ── Page wrapper ── */
-  .snake-page {
-    max-width: 460px;
-    margin: 0 auto;
+  /* ── Two-column layout ──────────────────────────────────────────────────── */
+  .snake-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
   }
 
-  /* ── Game card ── */
+  .snake-col-game {
+    flex: 0 0 400px;
+    min-width: 0;
+  }
+
+  .snake-col-info {
+    flex: 1;
+    min-width: 240px;
+  }
+
+  @media (max-width: 767px) {
+    .snake-layout { flex-direction: column; }
+    .snake-col-game { flex: none; width: 100%; }
+    .snake-col-info { width: 100%; }
+  }
+
+  /* ── Mode toggle bar ───────────────────────────────────────────────────── */
+  .snake-mode-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .snake-mode-btn {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(126, 200, 227, 0.25);
+    background: rgba(15, 25, 35, 0.6);
+    color: #90A4BE;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .snake-mode-btn.active {
+    background: #4A7FA5;
+    color: #fff;
+    border-color: #4A7FA5;
+  }
+
+  .snake-mode-btn:hover:not(.active) {
+    background: rgba(74, 127, 165, 0.2);
+    color: #7EC8E3;
+  }
+
+  /* ── Game card ─────────────────────────────────────────────────────────── */
   .snake-card {
     background: #0F1923;
     border-radius: 12px;
@@ -23,7 +73,6 @@ use-site-title: true
     border: 1px solid rgba(126, 200, 227, 0.12);
   }
 
-  /* ── Header bar ── */
   .snake-header {
     display: flex;
     align-items: center;
@@ -32,9 +81,7 @@ use-site-title: true
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   }
 
-  .snake-score-block {
-    line-height: 1;
-  }
+  .snake-score-block { line-height: 1; }
 
   .snake-score-label {
     font-size: 10px;
@@ -63,39 +110,19 @@ use-site-title: true
     transition: background 0.3s ease, color 0.3s ease;
   }
 
-  .snake-status.running {
-    background: rgba(72, 187, 120, 0.15);
-    color: #68D391;
-  }
+  .snake-status.running  { background: rgba(72, 187, 120, 0.15);  color: #68D391; }
+  .snake-status.over     { background: rgba(245, 101, 101, 0.15); color: #FC8181; }
+  .snake-status.loading  { background: rgba(144, 164, 190, 0.15); color: #90A4BE; }
 
-  .snake-status.over {
-    background: rgba(245, 101, 101, 0.15);
-    color: #FC8181;
-  }
+  .snake-canvas-wrap { line-height: 0; }
+  .snake-canvas-wrap canvas { display: block; width: 100%; height: auto; }
 
-  .snake-status.loading {
-    background: rgba(144, 164, 190, 0.15);
-    color: #90A4BE;
-  }
-
-  /* ── Canvas ── */
-  .snake-canvas-wrap {
-    line-height: 0;
-  }
-
-  .snake-canvas-wrap canvas {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  /* ── Footer bar ── */
   .snake-footer {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 14px 20px;
+    padding: 12px 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.07);
+    gap: 12px;
   }
 
   .btn-snake-reset {
@@ -103,7 +130,7 @@ use-site-title: true
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 9px 28px;
+    padding: 9px 24px;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -111,6 +138,7 @@ use-site-title: true
     font-family: inherit;
     transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
     box-shadow: 0 2px 8px rgba(74, 127, 165, 0.3);
+    white-space: nowrap;
   }
 
   .btn-snake-reset:hover {
@@ -119,56 +147,547 @@ use-site-title: true
     box-shadow: 0 4px 14px rgba(74, 127, 165, 0.45);
   }
 
-  /* ── Credits ── */
+  /* ── Speed control ─────────────────────────────────────────────────────── */
+  .snake-speed-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .snake-speed-label {
+    font-size: 10px;
+    color: #90A4BE;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .snake-speed-slider { width: 80px; accent-color: #4A7FA5; cursor: pointer; }
+
+  .snake-speed-value {
+    font-size: 12px;
+    color: #7EC8E3;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    min-width: 22px;
+  }
+
+  /* ── Credits ───────────────────────────────────────────────────────────── */
   .snake-credits {
-    margin-top: 20px;
-    font-size: 13px;
+    margin-top: 14px;
+    font-size: 12px;
     color: #718096;
     line-height: 1.7;
-    text-align: center;
   }
 
-  .snake-credits a {
-    color: #4A7FA5;
+  .snake-credits a { color: #4A7FA5; }
+  .snake-credits a:hover { color: #7EC8E3; }
+
+  /* ── Training status bar ───────────────────────────────────────────────── */
+  .snake-train-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    background: rgba(72, 187, 120, 0.12);
+    color: #68D391;
+    border: 1px solid rgba(72, 187, 120, 0.25);
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
   }
 
-  .snake-credits a:hover {
+  .snake-train-status.paused {
+    background: rgba(144, 164, 190, 0.12);
+    color: #90A4BE;
+    border-color: rgba(144, 164, 190, 0.25);
+  }
+
+  .snake-train-status.error {
+    background: rgba(245, 101, 101, 0.12);
+    color: #FC8181;
+    border-color: rgba(245, 101, 101, 0.25);
+  }
+
+  /* ── Watch-mode info card ──────────────────────────────────────────────── */
+  .snake-watch-info {
+    background: #0F1923;
+    border-radius: 12px;
+    border: 1px solid rgba(126, 200, 227, 0.12);
+    padding: 18px;
+    color: #90A4BE;
+    font-size: 13px;
+    line-height: 1.75;
+    margin-bottom: 14px;
+  }
+
+  .snake-watch-info h4 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
     color: #7EC8E3;
+    font-weight: 700;
+    margin: 0 0 10px;
   }
+
+  .snake-watch-info p { margin: 0 0 10px; }
+  .snake-watch-info p:last-child { margin: 0; }
+  .snake-watch-info strong { color: #CBD5E0; }
+
+  .snake-watch-nn {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .snake-nn-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .snake-nn-block {
+    background: rgba(74, 127, 165, 0.2);
+    border: 1px solid rgba(74, 127, 165, 0.4);
+    border-radius: 6px;
+    padding: 5px 10px;
+    color: #7EC8E3;
+    font-weight: 600;
+    white-space: nowrap;
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .snake-nn-arrow { color: #4A7FA5; font-size: 14px; }
+
+  /* ── Metrics panel ─────────────────────────────────────────────────────── */
+  .snake-metrics-card {
+    background: #0F1923;
+    border-radius: 12px;
+    border: 1px solid rgba(126, 200, 227, 0.12);
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .snake-metrics-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #90A4BE;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .snake-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .snake-metric-item {
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    padding: 9px 12px;
+  }
+
+  .snake-metric-wide { grid-column: 1 / -1; }
+
+  .snake-metric-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #718096;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .snake-metric-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #7EC8E3;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .snake-metric-bar-wrap {
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    height: 5px;
+    margin: 6px 0 4px;
+    overflow: hidden;
+  }
+
+  .snake-metric-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4A7FA5, #7EC8E3);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .snake-score-chart {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: 6px;
+    border-radius: 4px;
+  }
+
+  /* ── Education panel ───────────────────────────────────────────────────── */
+  .snake-edu-panel {
+    background: #0F1923;
+    border-radius: 12px;
+    border: 1px solid rgba(126, 200, 227, 0.12);
+    overflow: hidden;
+  }
+
+  .snake-edu-heading {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #90A4BE;
+    font-weight: 600;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin: 0;
+  }
+
+  .snake-edu-section { border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .snake-edu-section:last-child { border-bottom: none; }
+
+  .snake-edu-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 12px 16px;
+    color: #CBD5E0;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .snake-edu-toggle:hover {
+    color: #7EC8E3;
+    background: rgba(126, 200, 227, 0.05);
+  }
+
+  .snake-edu-chevron {
+    font-size: 16px;
+    font-weight: 400;
+    color: #4A7FA5;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .snake-edu-toggle[aria-expanded="true"] .snake-edu-chevron {
+    transform: rotate(45deg);
+  }
+
+  .snake-edu-body {
+    padding: 2px 16px 14px;
+    color: #90A4BE;
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .snake-edu-body p { margin: 0 0 8px; }
+  .snake-edu-body p:last-child { margin: 0; }
+  .snake-edu-body ul { padding-left: 18px; margin: 4px 0 8px; }
+  .snake-edu-body li { margin-bottom: 4px; }
+  .snake-edu-body strong { color: #CBD5E0; }
+
+  .snake-reward-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  .snake-reward-table td {
+    padding: 5px 8px;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .snake-reward-table td:first-child { color: #CBD5E0; }
+  .reward-pos { color: #68D391; font-weight: 700; }
+  .reward-neg { color: #FC8181; font-weight: 700; }
+  .reward-neu { color: #90A4BE; }
 </style>
 
-<div class="snake-page">
+<div class="snake-layout">
 
-  <div class="snake-card">
+  <!-- ── Left column: game ─────────────────────────────────────────────── -->
+  <div class="snake-col-game">
 
-    <!-- Header: score + status -->
-    <div class="snake-header">
-      <div class="snake-score-block">
-        <div class="snake-score-label">Score</div>
-        <div class="snake-score-value" id="snake-score">0</div>
+    <!-- Mode toggle -->
+    <div class="snake-mode-bar">
+      <button class="snake-mode-btn active" id="btn-mode-watch"
+              onclick="switchMode('watch')">Watch Pre-trained AI</button>
+      <button class="snake-mode-btn" id="btn-mode-train"
+              onclick="switchMode('train')">Train Your Own AI</button>
+    </div>
+
+    <!-- Game card -->
+    <div class="snake-card">
+
+      <div class="snake-header">
+        <div class="snake-score-block">
+          <div class="snake-score-label">Score</div>
+          <div class="snake-score-value" id="snake-score">0</div>
+        </div>
+        <span class="snake-status loading" id="snake-status">Loading…</span>
       </div>
-      <span class="snake-status loading" id="snake-status">Loading…</span>
+
+      <div class="snake-canvas-wrap">
+        <canvas id="snake" width="380" height="380"></canvas>
+      </div>
+
+      <div class="snake-footer">
+        <button class="btn-snake-reset" onclick="onResetClick()">Reset</button>
+        <div class="snake-speed-control" id="speed-control" style="display:none">
+          <span class="snake-speed-label">Speed</span>
+          <input type="range" id="speed-slider" class="snake-speed-slider"
+                 min="1" max="5" value="1" step="1"
+                 oninput="onSpeedChange(this.value)">
+          <span class="snake-speed-value" id="speed-label">1×</span>
+        </div>
+      </div>
+
+    </div><!-- /.snake-card -->
+
+    <p class="snake-credits">
+      Pre-trained via
+      <a href="https://github.com/hill-a/stable-baselines" target="_blank" rel="noopener">stable-baselines</a>.
+      In-browser DQN training powered by
+      <a href="https://www.tensorflow.org/js" target="_blank" rel="noopener">TensorFlow.js</a>.
+      Game interface from
+      <a href="https://github.com/CodeExplainedRepo/Snake-Javascript" target="_blank" rel="noopener">Snake-Javascript</a>.
+    </p>
+
+  </div><!-- /.snake-col-game -->
+
+  <!-- ── Right column: info + metrics + education ──────────────────────── -->
+  <div class="snake-col-info">
+
+    <!-- Training status bar (training mode only) -->
+    <div class="snake-train-status" id="train-status-bar" style="display:none">
+      <span id="train-status-icon">&#9654;</span>
+      <span id="train-status-text">Training in progress…</span>
     </div>
 
-    <!-- Canvas -->
-    <div class="snake-canvas-wrap">
-      <canvas id="snake" width="380" height="380"></canvas>
+    <!-- Watch-mode info card -->
+    <div class="snake-watch-info" id="watch-info">
+      <h4>About this AI</h4>
+      <p>
+        The snake is controlled by a small <strong>neural network</strong> trained
+        with <strong>reinforcement learning</strong>. It was never told the rules —
+        it learned entirely by playing thousands of games, receiving rewards for
+        eating food and penalties for dying.
+      </p>
+      <p>
+        Every 90 ms the network observes 12 boolean features about the game state
+        and outputs a score for each of the 4 possible directions. The
+        highest-scoring safe direction is chosen.
+      </p>
+      <div class="snake-watch-nn">
+        <div class="snake-metric-label">Neural network architecture</div>
+        <div class="snake-nn-row">
+          <div class="snake-nn-block">Input<br><small>12 features</small></div>
+          <span class="snake-nn-arrow">&#8594;</span>
+          <div class="snake-nn-block">Dense<br><small>64 · tanh</small></div>
+          <span class="snake-nn-arrow">&#8594;</span>
+          <div class="snake-nn-block">Dense<br><small>64 · tanh</small></div>
+          <span class="snake-nn-arrow">&#8594;</span>
+          <div class="snake-nn-block">Output<br><small>4 directions</small></div>
+        </div>
+      </div>
     </div>
 
-    <!-- Footer: reset button -->
-    <div class="snake-footer">
-      <button class="btn-snake-reset" onclick="init()">Reset</button>
-    </div>
+    <!-- Training metrics (training mode only) -->
+    <div class="snake-metrics-card" id="train-metrics" style="display:none">
+      <div class="snake-metrics-title">Training Metrics</div>
+      <div class="snake-metrics-grid">
 
-  </div>
+        <div class="snake-metric-item">
+          <div class="snake-metric-label">Episode</div>
+          <div class="snake-metric-value" id="m-episode">0</div>
+        </div>
 
-  <p class="snake-credits">
-    AI trained with reinforcement learning via
-    <a href="https://github.com/hill-a/stable-baselines" target="_blank" rel="noopener">stable-baselines</a>.
-    Game interface based on
-    <a href="https://github.com/CodeExplainedRepo/Snake-JavaScript" target="_blank" rel="noopener">Snake-Javascript</a>.
-  </p>
+        <div class="snake-metric-item">
+          <div class="snake-metric-label">Best Score</div>
+          <div class="snake-metric-value" id="m-best">0</div>
+        </div>
 
-</div>
+        <div class="snake-metric-item">
+          <div class="snake-metric-label">Avg Score (20 ep)</div>
+          <div class="snake-metric-value" id="m-avg">—</div>
+        </div>
 
+        <div class="snake-metric-item">
+          <div class="snake-metric-label">Ep. Reward</div>
+          <div class="snake-metric-value" id="m-reward">0</div>
+        </div>
+
+        <div class="snake-metric-item">
+          <div class="snake-metric-label">Epsilon ε</div>
+          <div class="snake-metric-value" id="m-epsilon">—</div>
+        </div>
+
+        <div class="snake-metric-item">
+          <div class="snake-metric-label">Train Loss</div>
+          <div class="snake-metric-value" id="m-loss">—</div>
+        </div>
+
+        <div class="snake-metric-item snake-metric-wide">
+          <div class="snake-metric-label">Replay Buffer</div>
+          <div class="snake-metric-bar-wrap">
+            <div class="snake-metric-bar" id="m-buffer-bar" style="width:0%"></div>
+          </div>
+          <div style="font-size:11px;color:#718096;margin-top:2px" id="m-buffer">0 / 10 000</div>
+        </div>
+
+        <div class="snake-metric-item snake-metric-wide">
+          <div class="snake-metric-label">Score History (last 60 episodes)</div>
+          <canvas id="score-chart" width="300" height="64"
+                  class="snake-score-chart"></canvas>
+        </div>
+
+      </div>
+    </div><!-- /#train-metrics -->
+
+    <!-- Education accordion (always visible) -->
+    <div class="snake-edu-panel">
+      <p class="snake-edu-heading">How does it work?</p>
+
+      <div class="snake-edu-section">
+        <button class="snake-edu-toggle" onclick="toggleEdu('edu-rl')"
+                aria-expanded="false">
+          What is Reinforcement Learning?
+          <span class="snake-edu-chevron">+</span>
+        </button>
+        <div class="snake-edu-body" id="edu-rl" style="display:none">
+          <p>
+            Reinforcement Learning (RL) is how the snake's AI learns — entirely
+            through <strong>trial and error</strong>, with no human teacher. The
+            agent (snake) takes an action, receives a numerical
+            <strong>reward signal</strong> from the environment, and gradually
+            figures out which actions lead to more total reward.
+          </p>
+          <p>
+            Think of it like training a dog: you don't explain the rules in words,
+            you just give treats for good behaviour and none for bad. Over thousands
+            of games the snake becomes competent.
+          </p>
+        </div>
+      </div>
+
+      <div class="snake-edu-section">
+        <button class="snake-edu-toggle" onclick="toggleEdu('edu-reward')"
+                aria-expanded="false">
+          What is the Reward Signal?
+          <span class="snake-edu-chevron">+</span>
+        </button>
+        <div class="snake-edu-body" id="edu-reward" style="display:none">
+          <p>Every action the snake takes returns a reward number.
+          The AI's goal is to maximise the <em>sum</em> of future rewards:</p>
+          <table class="snake-reward-table">
+            <tr><td>Eat a food pellet</td>    <td class="reward-pos">+10</td></tr>
+            <tr><td>Hit a wall or itself</td> <td class="reward-neg">&#8722;10</td></tr>
+            <tr><td>Any other step</td>       <td class="reward-neu">&#8722;0.01</td></tr>
+          </table>
+          <p style="margin-top:8px">The small per-step penalty discourages the
+          snake from wandering aimlessly instead of seeking food.</p>
+        </div>
+      </div>
+
+      <div class="snake-edu-section">
+        <button class="snake-edu-toggle" onclick="toggleEdu('edu-nn')"
+                aria-expanded="false">
+          What does the Neural Network see?
+          <span class="snake-edu-chevron">+</span>
+        </button>
+        <div class="snake-edu-body" id="edu-nn" style="display:none">
+          <p>The network receives a snapshot of 12 boolean (yes/no) features:</p>
+          <ul>
+            <li><strong>Food direction</strong> — is food left / right / up / down of the head?</li>
+            <li><strong>Current heading</strong> — which way is the snake moving?</li>
+            <li><strong>Danger</strong> — is there a wall close by in each direction?</li>
+          </ul>
+          <p>
+            It outputs one <strong>Q-value</strong> per direction — a score
+            estimating how much future reward that direction will yield. The
+            highest-scoring safe direction wins.
+          </p>
+        </div>
+      </div>
+
+      <div class="snake-edu-section">
+        <button class="snake-edu-toggle" onclick="toggleEdu('edu-dqn')"
+                aria-expanded="false">
+          What is DQN? (Explore vs Exploit)
+          <span class="snake-edu-chevron">+</span>
+        </button>
+        <div class="snake-edu-body" id="edu-dqn" style="display:none">
+          <p>
+            <strong>DQN (Deep Q-Network)</strong> is the algorithm used in
+            training mode. It faces a key trade-off:
+          </p>
+          <ul>
+            <li><strong>Explore</strong> — try random moves to discover new strategies</li>
+            <li><strong>Exploit</strong> — use what it already knows to score points</li>
+          </ul>
+          <p>
+            This is controlled by <strong>epsilon (ε)</strong>. In training mode the
+            network warm-starts with the pre-trained weights, so ε begins at 0.15
+            (mostly exploiting). It slowly decays toward 0.01 as fine-tuning proceeds.
+          </p>
+          <p>
+            DQN also stores past game transitions in an <strong>experience replay
+            buffer</strong> and trains on random mini-batches. This breaks correlations
+            between consecutive steps and stabilises learning.
+          </p>
+        </div>
+      </div>
+
+      <div class="snake-edu-section">
+        <button class="snake-edu-toggle" onclick="toggleEdu('edu-warmstart')"
+                aria-expanded="false">
+          Why does it already play well?
+          <span class="snake-edu-chevron">+</span>
+        </button>
+        <div class="snake-edu-body" id="edu-warmstart" style="display:none">
+          <p>
+            Instead of starting from a blank neural network, the in-browser DQN
+            is <strong>warm-started</strong> from the pre-trained model's weights.
+            The weight shapes are identical (both use 24&#8594;64&#8594;64&#8594;4
+            layers after one-hot encoding), so the weights transfer directly.
+          </p>
+          <p>
+            This means the snake already knows the basics from episode 1.
+            Training then <em>fine-tunes</em> rather than teaching from scratch,
+            so improvements appear much sooner. Watch the
+            <strong>Avg Score</strong> metric for evidence of continued learning.
+          </p>
+        </div>
+      </div>
+
+    </div><!-- /.snake-edu-panel -->
+
+  </div><!-- /.snake-col-info -->
+
+</div><!-- /.snake-layout -->
+
+<script src="/js/snake-dqn.js"></script>
 <script src="/js/snake.js"></script>
