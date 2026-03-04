@@ -51,7 +51,7 @@ function oneHotState(state12) {
  * @returns {boolean}  true on success, false if weight names didn't match
  */
 function transferWeightsFromGraphModel(graphModel, layersModel) {
-  const gw = graphModel.weights; // NamedTensorMap: {[name]: tf.Tensor}
+  const gw = graphModel.weights; // Typically a map: {[name]: tf.Tensor|tf.Tensor[]}
 
   // Names in order matching setWeights(): kernel0, bias0, kernel1, bias1, kernel2, bias2
   const names = [
@@ -60,7 +60,12 @@ function transferWeightsFromGraphModel(graphModel, layersModel) {
     'model/pi/w',     'model/pi/b',
   ];
 
-  const tensors = names.map(n => gw[n]);
+  const tensors = names.map(n => {
+    const val = gw[n];
+    // In GraphModel, weightMap entries are often arrays of Tensors (for sharded weights).
+    // For this model each weight lives in a single shard, so we take the first tensor.
+    return Array.isArray(val) ? val[0] : val;
+  });
   if (tensors.some(t => t == null)) {
     console.warn('[DQN] Weight transfer: some weights not found. Available keys:',
       Object.keys(gw).join(', '));
@@ -264,4 +269,13 @@ class DQNAgent {
     }
     return batch;
   }
+}
+
+// Node/CommonJS export hook for unit tests (no-op in the browser).
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    oneHotState,
+    transferWeightsFromGraphModel,
+    DQNAgent,
+  };
 }
