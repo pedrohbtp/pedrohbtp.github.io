@@ -215,6 +215,23 @@ use-site-title: true
     margin-top: 4px;
   }
   .chat-note a { color: #4A7FA5; }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    .chat-window {
+      height: 55vh;
+    }
+    .chat-input-area {
+      flex-direction: column;
+    }
+    .chat-send-btn {
+      width: 100%;
+    }
+    .chat-bubble {
+      max-width: 95%;
+      font-size: 15px;
+    }
+  }
 </style>
 
 <script type="module">
@@ -307,15 +324,36 @@ use-site-title: true
       },
     };
 
-    try {
-      // Try WebGPU first (faster on supported browsers)
-      generator = await pipeline('text-generation', MODEL_ID, { ...opts, device: 'webgpu' });
-    } catch {
-      // Fall back to WASM (works everywhere)
-      generator = await pipeline('text-generation', MODEL_ID, opts);
+    // Pre-check WebGPU: the API must exist AND successfully return an adapter.
+    // Without this guard, Transformers.js can throw "no available backend found"
+    // even inside the catch block when it internally retries WebGPU during
+    // auto-detection, making the WASM fallback unreachable on mobile browsers.
+    let webgpuReady = false;
+    if (typeof navigator !== 'undefined' && navigator.gpu) {
+      try {
+        const adapter = await navigator.gpu.requestAdapter();
+        webgpuReady = adapter !== null;
+      } catch {
+        // GPU API present but adapter unavailable (e.g. mobile Chrome)
+      }
     }
 
-    setStatus('ready', 'Model ready — running 100% locally in your browser', '✅');
+    if (webgpuReady) {
+      try {
+        generator = await pipeline('text-generation', MODEL_ID, { ...opts, device: 'webgpu' });
+        setStatus('ready', 'Model ready — running locally in your browser (GPU)', '✅');
+        setInputEnabled(true);
+        return;
+      } catch (e) {
+        console.warn('WebGPU pipeline failed, falling back to WASM:', e);
+      }
+    }
+
+    // Explicitly use WASM — works on all browsers including mobile.
+    // Omitting `device` triggers auto-detection which may retry WebGPU and
+    // surface the same error, so we pin it to 'wasm' here.
+    generator = await pipeline('text-generation', MODEL_ID, { ...opts, device: 'wasm' });
+    setStatus('ready', 'Model ready — running locally in your browser', '✅');
     setInputEnabled(true);
   }
 
