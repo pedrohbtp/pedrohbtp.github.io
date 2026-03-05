@@ -10,132 +10,252 @@ use-site-title: true
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
-      <!-- Status bar -->
-      <div id="status-bar" class="chat-status chat-status--loading">
-        <span id="status-icon" aria-hidden="true">⏳</span>
-        <span id="status-text">Loading model — first load may take a minute while weights download…</span>
-        <span id="progress-pct"></span>
-      </div>
+      <div class="chat-card">
 
-      <!-- Chat window -->
-      <div id="chat-window" class="chat-window" aria-live="polite" aria-label="Chat messages">
-        <div id="messages" class="chat-messages">
-          <div class="chat-msg chat-msg--assistant">
-            <div class="chat-bubble">
-              Hi! I'm SmolLM2 — a tiny language model running locally in your browser.
-              Ask me anything once the model finishes loading!
+        <!-- Top loading bar -->
+        <div id="progress-bar-wrap" class="progress-bar-wrap" aria-hidden="true">
+          <div id="progress-bar-fill" class="progress-bar-fill"></div>
+        </div>
+
+        <!-- Card header -->
+        <div class="chat-card-header">
+          <div class="chat-header-left">
+            <div class="chat-bot-avatar">
+              <i class="fa fa-magic" aria-hidden="true"></i>
+            </div>
+            <div class="chat-header-text">
+              <span class="chat-header-name">SmolLM2</span>
+              <span class="chat-header-sub">Local &middot; private &middot; no server</span>
+            </div>
+          </div>
+          <div id="status-indicator" class="status-indicator status-indicator--loading">
+            <span id="status-dot" class="status-dot"></span>
+            <span id="status-label">Loading&hellip;</span>
+          </div>
+        </div>
+
+        <!-- Chat window -->
+        <div id="chat-window" class="chat-window" aria-live="polite" aria-label="Chat messages">
+          <div id="messages" class="chat-messages">
+            <div class="chat-msg chat-msg--assistant">
+              <div class="msg-avatar msg-avatar--assistant" aria-hidden="true">
+                <i class="fa fa-magic"></i>
+              </div>
+              <div class="chat-bubble">
+                Hi! I'm SmolLM2 — a tiny language model running locally in your browser.
+                Ask me anything once the model finishes loading!
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Input area -->
-      <form id="chat-form" class="chat-input-area" onsubmit="return false;">
-        <textarea
-          id="user-input"
-          class="chat-input"
-          placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
-          rows="2"
-          disabled
-          aria-label="Your message"
-        ></textarea>
-        <button
-          id="send-btn"
-          type="submit"
-          class="btn chat-send-btn"
-          disabled
-          aria-label="Send message"
-        >
-          <i class="fa fa-paper-plane" aria-hidden="true"></i> Send
-        </button>
-      </form>
+        <!-- Input area -->
+        <div class="chat-input-footer">
+          <form id="chat-form" class="chat-input-area" onsubmit="return false;">
+            <textarea
+              id="user-input"
+              class="chat-input"
+              placeholder="Message SmolLM2… (Enter ↵ to send)"
+              rows="1"
+              disabled
+              aria-label="Your message"
+            ></textarea>
+            <button
+              id="send-btn"
+              type="submit"
+              class="chat-send-btn"
+              disabled
+              aria-label="Send message"
+              title="Send"
+            >
+              <i class="fa fa-paper-plane" aria-hidden="true"></i>
+            </button>
+          </form>
+          <p class="chat-note">
+            <a href="https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct" target="_blank" rel="noopener">SmolLM2-135M-Instruct</a>
+            &middot;
+            <a href="https://huggingface.co/docs/transformers.js" target="_blank" rel="noopener">Transformers.js</a>
+            &middot; weights cached after first load
+          </p>
+        </div>
 
-      <p class="chat-note">
-        Model: <a href="https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct" target="_blank" rel="noopener">SmolLM2-135M-Instruct</a>
-        &mdash; powered by <a href="https://huggingface.co/docs/transformers.js" target="_blank" rel="noopener">Transformers.js</a>.
-        Weights are cached in your browser after the first load.
-      </p>
+      </div><!-- /.chat-card -->
 
     </div>
   </div>
 </div>
 
 <style>
-  /* ── Status bar ── */
-  .chat-status {
+  /* ── Card container ── */
+  .chat-card {
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-card-bg);
+    box-shadow: 0 4px 32px var(--color-card-shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2rem;
+  }
+
+  /* ── Top progress bar ── */
+  .progress-bar-wrap {
+    height: 3px;
+    width: 100%;
+    background: transparent;
+    flex-shrink: 0;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--color-link);
+    width: 0%;
+    transition: width 0.35s ease;
+  }
+
+  /* ── Card header ── */
+  .chat-card-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+  .chat-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chat-bot-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #1D2B3A;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 14px;
-    font-weight: 500;
-    transition: background 0.3s, color 0.3s;
+    flex-shrink: 0;
   }
-  .chat-status--loading {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fbbf24;
+  .chat-header-name {
+    display: block;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--color-text);
+    line-height: 1.25;
   }
-  .chat-status--ready {
-    background: #d1fae5;
-    color: #065f46;
-    border: 1px solid #34d399;
+  .chat-header-sub {
+    display: block;
+    font-size: 11px;
+    color: var(--color-text-muted);
+    letter-spacing: 0.2px;
   }
-  .chat-status--error {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #f87171;
+
+  /* ── Status indicator ── */
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
   }
-  #progress-pct {
-    margin-left: auto;
-    font-variant-numeric: tabular-nums;
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-indicator--loading .status-dot {
+    background: #F6AD55;
+    animation: pulse-dot 1.5s infinite ease-in-out;
+  }
+  .status-indicator--ready .status-dot { background: #48BB78; }
+  .status-indicator--error .status-dot { background: #FC8181; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.5; transform: scale(0.8); }
+    50%       { opacity: 1;   transform: scale(1.15); }
   }
 
   /* ── Chat window ── */
   .chat-window {
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: #f8fafc;
-    height: 420px;
+    flex: 1;
+    height: 440px;
     overflow-y: auto;
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 20px;
+    background: var(--color-bg);
     scroll-behavior: smooth;
+  }
+  .chat-window::-webkit-scrollbar { width: 4px; }
+  .chat-window::-webkit-scrollbar-track { background: transparent; }
+  .chat-window::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
   }
   .chat-messages {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
   }
 
   /* ── Messages ── */
   .chat-msg {
     display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    animation: msg-fade-in 0.18s ease;
   }
-  .chat-msg--user   { justify-content: flex-end; }
+  .chat-msg--user      { justify-content: flex-end; }
   .chat-msg--assistant { justify-content: flex-start; }
 
+  @keyframes msg-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Message avatars ── */
+  .msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  .msg-avatar--assistant {
+    background: #1D2B3A;
+    color: #fff;
+    order: -1;
+  }
+  .msg-avatar--user {
+    background: #4A7FA5;
+    color: #fff;
+  }
+
+  /* ── Bubbles ── */
   .chat-bubble {
-    max-width: 80%;
+    max-width: 75%;
     padding: 10px 14px;
-    border-radius: 12px;
+    border-radius: 18px;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.65;
     white-space: pre-wrap;
     word-break: break-word;
   }
   .chat-msg--user .chat-bubble {
     background: #1D2B3A;
     color: #fff;
-    border-bottom-right-radius: 2px;
+    border-bottom-right-radius: 4px;
   }
   .chat-msg--assistant .chat-bubble {
-    background: #fff;
-    color: #1a202c;
-    border: 1px solid #e2e8f0;
-    border-bottom-left-radius: 2px;
+    background: #F0F4F8;
+    color: #2D3748;
+    border-bottom-left-radius: 4px;
   }
 
   /* ── Typing indicator ── */
@@ -143,92 +263,119 @@ use-site-title: true
     display: flex;
     gap: 4px;
     align-items: center;
-    padding: 2px 0;
+    padding: 4px 2px;
   }
   .typing-dot {
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: #94a3b8;
-    animation: dot-bounce 1.2s infinite ease-in-out;
+    animation: dot-bounce 1.4s infinite ease-in-out;
   }
+  .typing-dot:nth-child(1) { animation-delay: 0s; }
   .typing-dot:nth-child(2) { animation-delay: 0.2s; }
   .typing-dot:nth-child(3) { animation-delay: 0.4s; }
   @keyframes dot-bounce {
-    0%, 80%, 100% { transform: translateY(0);   opacity: 0.45; }
-    40%            { transform: translateY(-6px); opacity: 1; }
+    0%, 60%, 100% { transform: translateY(0);    opacity: 0.4; }
+    30%           { transform: translateY(-5px); opacity: 1; }
   }
 
-  /* ── Input area ── */
+  /* ── Input footer ── */
+  .chat-input-footer {
+    padding: 14px 16px 12px;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
   .chat-input-area {
     display: flex;
     gap: 8px;
     align-items: flex-end;
-    margin-bottom: 8px;
+    margin-bottom: 0;
   }
   .chat-input {
     flex: 1;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
     padding: 10px 14px;
     font-size: 14px;
     font-family: inherit;
     resize: none;
+    line-height: 1.5;
+    max-height: 120px;
+    overflow-y: auto;
     transition: border-color 0.2s, box-shadow 0.2s;
-    background: #fff;
+    background: var(--color-bg);
+    color: var(--color-text);
   }
+  .chat-input::placeholder { color: var(--color-text-muted); }
   .chat-input:focus {
     outline: none;
-    border-color: #4A7FA5;
-    box-shadow: 0 0 0 3px rgba(74,127,165,0.15);
+    border-color: var(--color-link);
+    box-shadow: 0 0 0 3px rgba(74, 127, 165, 0.15);
   }
   .chat-input:disabled {
-    background: #f1f5f9;
-    color: #94a3b8;
+    opacity: 0.55;
+    cursor: not-allowed;
   }
+
+  /* ── Send button — circular icon ── */
   .chat-send-btn {
-    white-space: nowrap;
-    padding: 10px 20px;
-    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     background: #1D2B3A;
-    border: 1px solid #1D2B3A;
+    border: none;
     color: #fff;
     font-size: 14px;
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0 0 0 2px; /* optical centre for paper-plane */
+    transition: background 0.2s, transform 0.15s;
   }
   .chat-send-btn:hover:not(:disabled) {
-    background: #2B6CB0;
-    border-color: #2B6CB0;
+    background: #4A7FA5;
+    transform: scale(1.08);
   }
+  .chat-send-btn:active:not(:disabled) { transform: scale(0.96); }
   .chat-send-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.35;
     cursor: not-allowed;
   }
 
   /* ── Footer note ── */
   .chat-note {
-    font-size: 12px;
-    color: #64748b;
+    font-size: 11px;
+    color: var(--color-text-muted);
     text-align: center;
-    margin-top: 4px;
+    margin: 10px 0 0;
+    line-height: 1.6;
   }
-  .chat-note a { color: #4A7FA5; }
+  .chat-note a { color: var(--color-link); }
+  .chat-note a:hover { color: var(--color-link-hover); }
+
+  /* ── Dark mode ── */
+  [data-theme="dark"] .chat-msg--assistant .chat-bubble {
+    background: #1E2D42;
+    color: #E2E8F0;
+  }
+  [data-theme="dark"] .chat-msg--user .chat-bubble {
+    background: #2B4A6A;
+    color: #EBF4FF;
+  }
+  [data-theme="dark"] .chat-input:focus {
+    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.18);
+  }
+  [data-theme="dark"] .typing-dot { background: #4A7FA5; }
 
   /* ── Mobile ── */
   @media (max-width: 600px) {
-    .chat-window {
-      height: 55vh;
-    }
-    .chat-input-area {
-      flex-direction: column;
-    }
-    .chat-send-btn {
-      width: 100%;
-    }
+    .chat-window { height: 55vh; }
+    .chat-card { border-radius: 12px; }
     .chat-bubble {
-      max-width: 95%;
+      max-width: 88%;
       font-size: 15px;
     }
   }
@@ -239,43 +386,68 @@ use-site-title: true
     'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/dist/transformers.min.js';
 
   // ── Constants ──────────────────────────────────────────────────────────────
-  const MODEL_ID = 'HuggingFaceTB/SmolLM2-135M-Instruct';
+  const MODEL_ID    = 'HuggingFaceTB/SmolLM2-135M-Instruct';
   const SYSTEM_PROMPT = 'You are a helpful, concise assistant. Keep answers short and clear.';
 
   // ── State ──────────────────────────────────────────────────────────────────
-  let generator = null;
-  let isGenerating = false;
+  let generator          = null;
+  let isGenerating       = false;
   let conversationHistory = [{ role: 'system', content: SYSTEM_PROMPT }];
 
   // ── DOM refs ───────────────────────────────────────────────────────────────
-  const statusBar  = document.getElementById('status-bar');
-  const statusIcon = document.getElementById('status-icon');
-  const statusText = document.getElementById('status-text');
-  const progressEl = document.getElementById('progress-pct');
-  const messagesEl = document.getElementById('messages');
-  const chatWindow = document.getElementById('chat-window');
-  const userInput  = document.getElementById('user-input');
-  const sendBtn    = document.getElementById('send-btn');
+  const statusIndicator = document.getElementById('status-indicator');
+  const statusLabel     = document.getElementById('status-label');
+  const progressWrap    = document.getElementById('progress-bar-wrap');
+  const progressFill    = document.getElementById('progress-bar-fill');
+  const messagesEl      = document.getElementById('messages');
+  const chatWindow      = document.getElementById('chat-window');
+  const userInput       = document.getElementById('user-input');
+  const sendBtn         = document.getElementById('send-btn');
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  function setStatus(type, text, icon, pct) {
-    statusBar.className = 'chat-status chat-status--' + type;
-    statusIcon.textContent = icon;
-    statusText.textContent = text;
-    progressEl.textContent = pct !== undefined ? pct + '%' : '';
+  function setStatus(type, text, pct) {
+    statusIndicator.className = 'status-indicator status-indicator--' + type;
+    statusLabel.textContent   = pct !== undefined ? text + ' ' + pct + '%' : text;
+
+    if (type === 'loading') {
+      progressFill.style.width = (pct !== undefined ? pct : 0) + '%';
+    } else {
+      // snap to full then fade the bar out
+      progressFill.style.width = '100%';
+      setTimeout(() => { progressFill.style.width = '0%'; }, 500);
+    }
   }
 
   function scrollBottom() {
     chatWindow.scrollTop = chatWindow.scrollHeight;
   }
 
+  function createAvatar(role) {
+    const el = document.createElement('div');
+    el.className    = 'msg-avatar msg-avatar--' + role;
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = role === 'assistant'
+      ? '<i class="fa fa-magic"></i>'
+      : '<i class="fa fa-user"></i>';
+    return el;
+  }
+
   function appendMessage(role, content) {
     const wrap   = document.createElement('div');
     wrap.className = 'chat-msg chat-msg--' + role;
+
     const bubble = document.createElement('div');
-    bubble.className = 'chat-bubble';
+    bubble.className  = 'chat-bubble';
     bubble.textContent = content;
-    wrap.appendChild(bubble);
+
+    if (role === 'assistant') {
+      wrap.appendChild(createAvatar(role));
+      wrap.appendChild(bubble);
+    } else {
+      wrap.appendChild(bubble);
+      wrap.appendChild(createAvatar(role));
+    }
+
     messagesEl.appendChild(wrap);
     scrollBottom();
     return bubble;
@@ -284,13 +456,17 @@ use-site-title: true
   function showTyping() {
     const wrap = document.createElement('div');
     wrap.className = 'chat-msg chat-msg--assistant';
-    wrap.id = 'typing-indicator';
-    wrap.innerHTML =
-      '<div class="chat-bubble"><div class="typing-dots">' +
+    wrap.id        = 'typing-indicator';
+    wrap.appendChild(createAvatar('assistant'));
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.innerHTML =
+      '<div class="typing-dots">' +
       '<div class="typing-dot"></div>' +
       '<div class="typing-dot"></div>' +
       '<div class="typing-dot"></div>' +
-      '</div></div>';
+      '</div>';
+    wrap.appendChild(bubble);
     messagesEl.appendChild(wrap);
     scrollBottom();
   }
@@ -306,20 +482,24 @@ use-site-title: true
     if (enabled) userInput.focus();
   }
 
+  // Auto-resize textarea up to ~5 lines
+  function autoResize() {
+    userInput.style.height = 'auto';
+    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+  }
+  userInput.addEventListener('input', autoResize);
+
   // ── Load model ─────────────────────────────────────────────────────────────
   async function loadModel() {
     const opts = {
       dtype: 'q4',
       progress_callback: ({ status, progress, file }) => {
         if (status === 'progress' && progress !== undefined) {
-          setStatus('loading',
-            'Downloading — ' + (file || 'model weights') + '…',
-            '⏳',
-            Math.round(progress));
+          setStatus('loading', 'Downloading…', Math.round(progress));
         } else if (status === 'initiate') {
-          setStatus('loading', 'Initialising model…', '⏳');
+          setStatus('loading', 'Initialising…');
         } else if (status === 'done') {
-          setStatus('loading', 'Finalising…', '⏳');
+          setStatus('loading', 'Finalising…');
         }
       },
     };
@@ -332,7 +512,7 @@ use-site-title: true
     if (typeof navigator !== 'undefined' && navigator.gpu) {
       try {
         const adapter = await navigator.gpu.requestAdapter();
-        webgpuReady = adapter !== null;
+        webgpuReady   = adapter !== null;
       } catch {
         // GPU API present but adapter unavailable (e.g. mobile Chrome)
       }
@@ -341,7 +521,7 @@ use-site-title: true
     if (webgpuReady) {
       try {
         generator = await pipeline('text-generation', MODEL_ID, { ...opts, device: 'webgpu' });
-        setStatus('ready', 'Model ready — running locally in your browser (GPU)', '✅');
+        setStatus('ready', 'GPU ready');
         setInputEnabled(true);
         return;
       } catch (e) {
@@ -353,7 +533,7 @@ use-site-title: true
     // Omitting `device` triggers auto-detection which may retry WebGPU and
     // surface the same error, so we pin it to 'wasm' here.
     generator = await pipeline('text-generation', MODEL_ID, { ...opts, device: 'wasm' });
-    setStatus('ready', 'Model ready — running locally in your browser', '✅');
+    setStatus('ready', 'Ready');
     setInputEnabled(true);
   }
 
@@ -362,9 +542,10 @@ use-site-title: true
     const text = userInput.value.trim();
     if (!text || isGenerating || !generator) return;
 
-    isGenerating = true;
+    isGenerating       = true;
     setInputEnabled(false);
-    userInput.value = '';
+    userInput.value    = '';
+    userInput.style.height = 'auto'; // reset textarea height
 
     conversationHistory.push({ role: 'user', content: text });
     appendMessage('user', text);
@@ -375,7 +556,7 @@ use-site-title: true
 
     try {
       const streamer = new TextStreamer(generator.tokenizer, {
-        skip_prompt: true,
+        skip_prompt:         true,
         skip_special_tokens: true,
         callback_function: (token) => {
           if (!assistantBubble) {
@@ -390,9 +571,9 @@ use-site-title: true
 
       await generator(conversationHistory, {
         max_new_tokens: 256,
-        temperature: 0.7,
-        top_p: 0.9,
-        do_sample: true,
+        temperature:    0.7,
+        top_p:          0.9,
+        do_sample:      true,
         streamer,
       });
 
@@ -423,7 +604,7 @@ use-site-title: true
 
   // ── Boot ───────────────────────────────────────────────────────────────────
   loadModel().catch((err) => {
-    setStatus('error', 'Failed to load model: ' + err.message, '❌');
+    setStatus('error', 'Load failed');
     console.error(err);
   });
 </script>
