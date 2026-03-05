@@ -14,7 +14,7 @@ const { defineConfig, devices } = require('/opt/node22/lib/node_modules/playwrig
  *   /opt/node22/bin/playwright test --ui        (interactive UI mode)
  */
 module.exports = defineConfig({
-  testDir: './tests',
+  testDir: './tests/e2e',
 
   /* Fail fast in CI, retry once in local dev */
   retries: process.env.CI ? 2 : 0,

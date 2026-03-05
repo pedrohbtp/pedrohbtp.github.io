@@ -6,7 +6,7 @@
     "test:headed": "/opt/node22/bin/playwright test --headed",
     "test:ui": "/opt/node22/bin/playwright test --ui",
     "test:report": "/opt/node22/bin/playwright show-report",
-    "test:unit": "jest js/segmentation.test.js"
+    "test:unit": "jest tests/unit"
   },
   "jest": {
     "testEnvironment": "node"

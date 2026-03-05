@@ -7,7 +7,7 @@ const {
   buildSamInputs,
   parseHsla,
   hslToRgb,
-} = require('./segmentation.js');
+} = require('../../js/segmentation.js');
 
 // ── normalizeCoords ───────────────────────────────────────────────────────
 
