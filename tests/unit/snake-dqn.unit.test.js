@@ -16,7 +16,7 @@ global.tf = {
 const {
   oneHotState,
   transferWeightsFromGraphModel,
-} = require('../js/snake-dqn.js');
+} = require('../../js/snake-dqn.js');
 
 test('oneHotState encodes a 12-element binary vector into length-24 one-hot', () => {
   const input = [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
