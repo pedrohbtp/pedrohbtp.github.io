@@ -76,7 +76,6 @@ social-network-links:
   # email: "someone@example.com"
   # facebook: daattali
   github: pedrohbtp
-  twitter: pebtp
 #  reddit: yourname
 #  google-plus: +DeanAttali
   linkedin: pedrohbtp
@@ -94,7 +93,7 @@ social-network-links:
 
 # Select which share links to show in posts
 share-links-active:
-  twitter: true
+  twitter: false
   facebook: true
   google: false
   linkedin: true
