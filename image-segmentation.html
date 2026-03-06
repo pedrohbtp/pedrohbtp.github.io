@@ -472,6 +472,9 @@ use-site-title: true
     var cx     = (e.clientX - rect.left)  * scaleX;
     var cy     = (e.clientY - rect.top)   * scaleY;
 
+    // Show the click point immediately for instant feedback.
+    drawClickMarker(maskCanvas, cx, cy);
+
     spinner.classList.add('visible');
     setStatus('processing', 'Segmenting…');
 
