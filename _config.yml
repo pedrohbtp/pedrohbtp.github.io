@@ -17,7 +17,7 @@ baseurl: ""
 title: Pedro Borges Torres
 
 # Short description of your site
-description: Place for general information about myself and projects
+description: "Software Engineer & Entrepreneur — MS CS from UCLA, specializing in AI, LLMs, and cloud systems."
 
 # --- Navigation bar options --- #
 
@@ -66,6 +66,7 @@ footer-link-col: "#CBD5E0"
 # Important: you must keep the "name" parameter, everything else you can remove
 author:
   name: Pedro Borges Torres
+  twitter: TechWithPedro
 
 # Select your active Social Network Links.
 # Uncomment the links you want to show in the footer and add your information to each link.

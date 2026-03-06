@@ -79,7 +79,7 @@
   {% endif %}
 
 
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="{% if page.id %}article{% else %}website{% endif %}" />
 
   {% if page.id %}
   <meta property="og:url" content="{{ site.url }}{{ page.url }}" />
@@ -98,8 +98,10 @@
 
   <!-- Twitter summary cards -->
   <meta name="twitter:card" content="summary" />
+  {% if site.author.twitter %}
   <meta name="twitter:site" content="@{{ site.author.twitter }}" />
   <meta name="twitter:creator" content="@{{ site.author.twitter }}" />
+  {% endif %}
 
   {% if page.meta-title %}
   <meta name="twitter:title" content="{{ page.meta-title }}" />
@@ -126,6 +128,8 @@
   {% if site.matomo %}
   {% include matomo.html %}
   {% endif %}
+
+  {% include jsonld.html %}
 
   <!-- Apply saved theme before first paint to avoid flash -->
   <script>
