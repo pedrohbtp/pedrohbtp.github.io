@@ -47,18 +47,18 @@ test('getMaskColor returns a valid HSLA string', () => {
 // ── buildSamInputs ────────────────────────────────────────────────────────
 
 test('buildSamInputs formats input_points correctly', () => {
-  const result = buildSamInputs(0.5, 0.3);
-  expect(result.input_points).toEqual([[[0.5, 0.3]]]);
+  const result = buildSamInputs(320, 240);
+  expect(result.input_points).toEqual([[[320, 240]]]);
 });
 
 test('buildSamInputs uses foreground label (1)', () => {
-  const result = buildSamInputs(0.5, 0.3);
+  const result = buildSamInputs(320, 240);
   expect(result.input_labels).toEqual([[1]]);
 });
 
 test('buildSamInputs works at boundary coordinates', () => {
   expect(buildSamInputs(0, 0).input_points).toEqual([[[0, 0]]]);
-  expect(buildSamInputs(1, 1).input_points).toEqual([[[1, 1]]]);
+  expect(buildSamInputs(1024, 768).input_points).toEqual([[[1024, 768]]]);
 });
 
 // ── parseHsla ─────────────────────────────────────────────────────────────
