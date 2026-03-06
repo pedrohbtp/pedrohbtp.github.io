@@ -1,36 +1,54 @@
 # Run the Test Suite
 
-Run the Playwright E2E tests to verify all pages load correctly.
+Run unit tests and/or Playwright E2E tests to verify the codebase.
 
 ## Prerequisites
 
 Dependencies must be installed first. Run `/install` if you haven't already.
 
-## Run all tests (build + test)
+## Unit tests (Jest) — no server needed
+
+Fast feedback, no Jekyll server required:
 
 ```bash
-PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test
+npm run test:unit
 ```
 
-This builds the Jekyll site to `_site/` then runs all 40 Playwright tests.
+Covers 19 tests across two modules:
+- **`js/snake-dqn.js`** — `oneHotState()`, `transferWeightsFromGraphModel()`
+- **`js/segmentation.js`** — `normalizeCoords()`, `getMaskColor()`, `buildSamInputs()`, `parseHsla()`, `hslToRgb()`
 
-## Run tests against a running server
-
-If Jekyll is already serving on port 4000 (via `/serve`):
+## E2E tests (Playwright) — builds site + starts server automatically
 
 ```bash
-/opt/node22/bin/playwright test
+npm test
 ```
 
-## Other options
+Runs all 40 Playwright tests. The server starts automatically via `playwright.config.js`.
+
+## All tests (unit + E2E)
 
 ```bash
-/opt/node22/bin/playwright test --headed   # show browser window
-/opt/node22/bin/playwright test --ui       # interactive UI mode
-/opt/node22/bin/playwright show-report     # view last test report
+npm run test:all
 ```
 
-## What's tested
+## Other E2E options
+
+```bash
+npm run test:headed   # show browser window while tests run
+npm run test:ui       # interactive Playwright UI mode
+npm run test:report   # view HTML report from the last run
+```
+
+## Rake equivalents
+
+```bash
+PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test        # build + unit + E2E (default)
+PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test:unit   # unit tests only
+PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test:e2e    # E2E only (server must be running)
+```
+
+## What's tested (E2E)
 
 - **Homepage** — hero section, skill pills, projects, avatar, nav/footer
 - **About** — loads, title, bio content

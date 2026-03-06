@@ -2,11 +2,13 @@
   "name": "pedrohbtp-github-io",
   "private": true,
   "scripts": {
-    "test": "/opt/node22/bin/playwright test",
-    "test:headed": "/opt/node22/bin/playwright test --headed",
-    "test:ui": "/opt/node22/bin/playwright test --ui",
-    "test:report": "/opt/node22/bin/playwright show-report",
-    "test:unit": "jest tests/unit"
+    "test": "playwright test",
+    "test:e2e": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:unit": "jest tests/unit",
+    "test:all": "jest tests/unit && playwright test"
   },
   "jest": {
     "testEnvironment": "node"
