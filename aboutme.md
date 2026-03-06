@@ -1,7 +1,7 @@
 ---
 layout: page
 title: About me
-# subtitle: Why you'd want to go on a date with me
+subtitle: "About Pedro Borges Torres — Software Engineer & Entrepreneur with an MS in CS from UCLA, specializing in AI and cloud systems."
 ---
 
 MS CS - UCLA. BS Mechatronics Eng - UnB. 

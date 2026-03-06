@@ -1,0 +1,32 @@
+{% if page.url == "/" or page.url == "/index.html" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Pedro Borges Torres",
+  "url": "{{ site.url }}",
+  "image": "{{ site.url }}{{ site.avatar }}",
+  "jobTitle": "Software Engineer & Entrepreneur",
+  "alumniOf": {"@type": "CollegeOrUniversity", "name": "UCLA"},
+  "sameAs": [
+    "https://github.com/pedrohbtp",
+    "https://www.linkedin.com/in/pedrohbtp",
+    "https://medium.com/@pedrohbtp",
+    "https://www.youtube.com/@TechWithPedro"
+  ]
+}
+</script>
+{% elsif page.id %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ page.title | escape }}",
+  "description": "{{ page.subtitle | default: page.excerpt | strip_html | escape }}",
+  "image": "{{ page.share-img | default: site.avatar | prepend: site.url }}",
+  "author": {"@type": "Person", "name": "{{ site.author.name }}"},
+  "datePublished": "{{ page.date | date_to_xmlschema }}",
+  "url": "{{ site.url }}{{ page.url }}"
+}
+</script>
+{% endif %}
