@@ -174,7 +174,12 @@ async function runSegmentation(sourceCanvas, clickX, clickY, overlayCanvas) {
       inputs.reshaped_input_sizes
     );
 
-    drawMaskOnCanvas(overlayCanvas, masks[0][0], _maskCount);
+    // masks[0] is a Tensor [num_masks, H, W].  Prefer the sliced first mask
+    // via proxy indexing; fall back to the full batch tensor so drawMaskOnCanvas
+    // can use its last-two-dims logic (picks data[0..H*W-1] = mask 0).
+    var maskTensor = masks[0][0];
+    if (!maskTensor || !maskTensor.dims) maskTensor = masks[0];
+    drawMaskOnCanvas(overlayCanvas, maskTensor, _maskCount);
     _maskCount++;
     return true;
   } finally {
@@ -185,20 +190,34 @@ async function runSegmentation(sourceCanvas, clickX, clickY, overlayCanvas) {
 /**
  * Draw a boolean SAM mask tensor as a semi-transparent colour overlay.
  *
+ * Handles tensors of shape [H, W] or [N, H, W] (e.g. when Transformers.js v3
+ * returns the full batch of candidate masks without pre-slicing).  When the
+ * tensor has 3+ dims we use the last two as height/width and read only the
+ * first mask's pixel data (offset = 0), which is equivalent to picking mask 0.
+ *
  * @param {HTMLCanvasElement} canvas
- * @param {{ dims: number[], data: Uint8Array|boolean[] }} maskTensor  Shape [H, W]
+ * @param {{ dims: number[], data: Uint8Array|boolean[] }} maskTensor
  * @param {number} maskIndex
  */
 function drawMaskOnCanvas(canvas, maskTensor, maskIndex) {
   var ctx    = canvas.getContext('2d');
   var dims   = maskTensor.dims;
-  var h      = dims[0];
-  var w      = dims[1];
-  var rgba   = parseHsla(getMaskColor(maskIndex));
+  var h, w;
+
+  // Robust dim extraction: accept [H,W] and [N,H,W] (or deeper) shapes.
+  if (dims.length >= 3) {
+    h = dims[dims.length - 2];
+    w = dims[dims.length - 1];
+  } else {
+    h = dims[0];
+    w = dims[1];
+  }
+
+  var rgba    = parseHsla(getMaskColor(maskIndex));
   var imgData = ctx.createImageData(w, h);
-  var px     = imgData.data;
-  var mask   = maskTensor.data;
-  var alpha  = Math.round(rgba.a * 255);
+  var px      = imgData.data;
+  var mask    = maskTensor.data;
+  var alpha   = Math.round(rgba.a * 255);
 
   for (var i = 0; i < h * w; i++) {
     if (mask[i]) {
@@ -218,6 +237,57 @@ function drawMaskOnCanvas(canvas, maskTensor, maskIndex) {
   ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
 }
 
+/**
+ * Draw a crosshair + circle marker at (cx, cy) on the overlay canvas to show
+ * exactly where the user clicked.
+ *
+ * @param {HTMLCanvasElement} canvas  The overlay (mask) canvas.
+ * @param {number} cx                Click X in canvas-pixel coordinates.
+ * @param {number} cy                Click Y in canvas-pixel coordinates.
+ */
+function drawClickMarker(canvas, cx, cy) {
+  var ctx = canvas.getContext('2d');
+  var r   = Math.max(7, Math.min(20, canvas.width * 0.016));
+  var arm = r * 1.6; // crosshair arm length
+
+  ctx.save();
+
+  // Helper: stroke the crosshair lines twice (shadow then foreground).
+  function strokeCrosshair(color, width) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = width;
+    ctx.beginPath();
+    ctx.moveTo(cx - arm, cy); ctx.lineTo(cx + arm, cy);
+    ctx.moveTo(cx, cy - arm); ctx.lineTo(cx, cy + arm);
+    ctx.stroke();
+  }
+
+  // Helper: stroke the circle twice (shadow then foreground).
+  function strokeCircle(color, width) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = width;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Shadow pass for contrast against any background.
+  strokeCrosshair('rgba(0,0,0,0.55)', 3.5);
+  strokeCircle('rgba(0,0,0,0.55)', 3.5);
+
+  // Foreground pass.
+  strokeCrosshair('rgba(255,255,255,0.92)', 1.8);
+  strokeCircle('rgba(255,255,255,0.92)', 1.8);
+
+  // Bright centre dot.
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+  ctx.fillStyle = '#7EC8E3';
+  ctx.fill();
+
+  ctx.restore();
+}
+
 /** Reset the running mask counter (call when user clears/changes the image). */
 function resetMaskCount() { _maskCount = 0; }
 
@@ -235,5 +305,6 @@ if (typeof module !== 'undefined' && module.exports) {
     buildSamInputs,
     parseHsla,
     hslToRgb,
+    drawClickMarker,
   };
 }

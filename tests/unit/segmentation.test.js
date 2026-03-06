@@ -7,7 +7,26 @@ const {
   buildSamInputs,
   parseHsla,
   hslToRgb,
+  drawClickMarker,
 } = require('../../js/segmentation.js');
+
+// Minimal canvas mock used by drawClickMarker tests.
+function makeMockCanvas(w, h) {
+  const ctx = {
+    save:      jest.fn(),
+    restore:   jest.fn(),
+    beginPath: jest.fn(),
+    moveTo:    jest.fn(),
+    lineTo:    jest.fn(),
+    arc:       jest.fn(),
+    stroke:    jest.fn(),
+    fill:      jest.fn(),
+    strokeStyle: '',
+    lineWidth:   0,
+    fillStyle:   '',
+  };
+  return { width: w, height: h, getContext: () => ctx, _ctx: ctx };
+}
 
 // ── normalizeCoords ───────────────────────────────────────────────────────
 
@@ -118,4 +137,47 @@ test('hslToRgb handles achromatic (grey) input', () => {
   expect(r).toBe(128);
   expect(g).toBe(128);
   expect(b).toBe(128);
+});
+
+// ── drawClickMarker ───────────────────────────────────────────────────────
+
+test('drawClickMarker calls save and restore for state isolation', () => {
+  const canvas = makeMockCanvas(800, 600);
+  drawClickMarker(canvas, 400, 300);
+  expect(canvas._ctx.save).toHaveBeenCalledTimes(1);
+  expect(canvas._ctx.restore).toHaveBeenCalledTimes(1);
+});
+
+test('drawClickMarker draws arcs centred on the click point', () => {
+  const canvas = makeMockCanvas(800, 600);
+  drawClickMarker(canvas, 123, 456);
+  const centredArcs = canvas._ctx.arc.mock.calls.filter(
+    ([cx, cy]) => cx === 123 && cy === 456
+  );
+  expect(centredArcs.length).toBeGreaterThanOrEqual(2); // ring + dot
+});
+
+test('drawClickMarker draws crosshair lines through the click point', () => {
+  const canvas = makeMockCanvas(800, 600);
+  drawClickMarker(canvas, 200, 150);
+  // moveTo calls should include y===150 (horizontal) and x===200 (vertical)
+  const moves = canvas._ctx.moveTo.mock.calls;
+  expect(moves.some(([, y]) => y === 150)).toBe(true); // horizontal arm start
+  expect(moves.some(([x]) => x === 200)).toBe(true);   // vertical arm start
+});
+
+test('drawClickMarker clamps radius for very small canvases', () => {
+  const canvas = makeMockCanvas(50, 50);
+  expect(() => drawClickMarker(canvas, 25, 25)).not.toThrow();
+  // At least one arc should have radius >= 7 (the minimum clamp)
+  const radii = canvas._ctx.arc.mock.calls.map(([, , r]) => r);
+  expect(radii.some(r => r >= 7)).toBe(true);
+});
+
+test('drawClickMarker clamps radius for very large canvases', () => {
+  const canvas = makeMockCanvas(5000, 3000);
+  expect(() => drawClickMarker(canvas, 2500, 1500)).not.toThrow();
+  // At least one arc should have radius <= 20 (the maximum clamp)
+  const radii = canvas._ctx.arc.mock.calls.map(([, , r]) => r);
+  expect(radii.some(r => r <= 20)).toBe(true);
 });
