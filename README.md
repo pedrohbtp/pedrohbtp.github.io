@@ -20,14 +20,30 @@ Visit http://localhost:4000. The server auto-regenerates on file changes.
 
 ## Test
 
-Runs the Playwright E2E suite (40 tests) against all pages:
+### Unit tests (Jest) — no server required
 
 ```bash
-# Build site and run all tests (one command)
-PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test
+npm run test:unit
+```
 
-# Or run tests against an already-running server
-/opt/node22/bin/playwright test
+### E2E tests (Playwright) — builds site and starts server automatically
+
+```bash
+npm test
+```
+
+### All tests (unit + E2E)
+
+```bash
+npm run test:all
+```
+
+### Rake equivalents
+
+```bash
+PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test        # unit + E2E (default)
+PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test:unit   # unit only
+PATH="/opt/rbenv/versions/3.3.6/bin:$PATH" rake test:e2e    # E2E only (server must be running)
 ```
 
 ## Update gems
