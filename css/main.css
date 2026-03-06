@@ -228,6 +228,27 @@ layout: null
   display: block;
 }
 
+/* --- Article icon (Writing section) --- */
+
+.article-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--color-border);
+  border-radius: 6px;
+  margin-bottom: 14px;
+  font-size: 22px;
+  color: var(--color-text-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+[data-theme="dark"] .article-icon {
+  background-color: #1E2D42;
+  color: #A0B8D0;
+}
+
 /* --- Project card tech tags --- */
 
 .item-tags {
