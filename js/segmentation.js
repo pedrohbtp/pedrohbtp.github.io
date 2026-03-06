@@ -39,13 +39,13 @@ function getMaskColor(maskIndex) {
 
 /**
  * Build the SAM processor point-prompt input dict for a single click.
- * @param {number} normX  Normalised x in [0, 1]
- * @param {number} normY  Normalised y in [0, 1]
+ * @param {number} x  Click x in canvas-pixel coordinates
+ * @param {number} y  Click y in canvas-pixel coordinates
  * @returns {{ input_points: number[][][], input_labels: number[][] }}
  */
-function buildSamInputs(normX, normY) {
+function buildSamInputs(x, y) {
   return {
-    input_points: [[[normX, normY]]],
+    input_points: [[[x, y]]],
     input_labels: [[1]],
   };
 }
@@ -163,11 +163,8 @@ async function runSegmentation(sourceCanvas, clickX, clickY, overlayCanvas) {
     )).RawImage;
 
     var rawImage = await RawImage.fromURL(sourceCanvas.toDataURL());
-    var coords   = normalizeCoords(clickX, clickY, sourceCanvas.width, sourceCanvas.height);
-    var normX    = coords[0];
-    var normY    = coords[1];
 
-    var inputs       = await _samProcessor(rawImage, buildSamInputs(normX, normY));
+    var inputs       = await _samProcessor(rawImage, buildSamInputs(clickX, clickY));
     var outputs      = await _samModel(inputs);
     var pred_masks   = outputs.pred_masks;
 

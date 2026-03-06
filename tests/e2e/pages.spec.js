@@ -95,7 +95,7 @@ test.describe('Chat page (/chat/)', () => {
 
   test('renders chat status bar', async ({ page }) => {
     await page.goto('/chat/');
-    await expect(page.locator('#status-bar, .chat-status')).toBeVisible();
+    await expect(page.locator('#status-indicator')).toBeVisible();
   });
 });
 
@@ -115,7 +115,7 @@ test.describe('Snake RL page (/snake-rl/)', () => {
 
   test('contains game canvas', async ({ page }) => {
     await page.goto('/snake-rl/');
-    await expect(page.locator('canvas')).toBeVisible();
+    await expect(page.locator('#snake')).toBeVisible();
   });
 });
 
