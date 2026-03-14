@@ -80,15 +80,56 @@ var main = {
     });
 
     // On mobile, when clicking on a multi-level navbar menu, show the child links
-    $('#main-navbar').on("click", ".navlinks-parent", function(e) {
-      var target = e.target;
-      $.each($(".navlinks-parent"), function(key, value) {
-        if (value == target) {
-          $(value).parent().toggleClass("show-children");
-        } else {
-          $(value).parent().removeClass("show-children");
-        }
+    var closeAllNavChildren = function() {
+      $.each($(".navlinks-container"), function(_, container) {
+        $(container).removeClass("show-children");
+        $(container).find(".navlinks-parent").attr("aria-expanded", "false");
       });
+    };
+
+    $('#main-navbar').on("click", ".navlinks-parent", function(e) {
+      var parent = $(this).parent();
+      var isOpen = parent.hasClass("show-children");
+
+      closeAllNavChildren();
+
+      if (!isOpen) {
+        parent.addClass("show-children");
+        $(this).attr("aria-expanded", "true");
+      }
+
+      e.stopPropagation();
+    });
+
+    $(document).on("click", function() {
+      closeAllNavChildren();
+    });
+
+    $('#main-navbar').on('hide.bs.collapse', function() {
+      closeAllNavChildren();
+    });
+
+    $('#main-navbar').on('keydown', '.navlinks-parent', function(e) {
+      if (e.key === 'Escape') {
+        closeAllNavChildren();
+        $(this).blur();
+      }
+    });
+
+    $('#main-navbar').on('focusin', '.navlinks-container', function() {
+      closeAllNavChildren();
+      $(this).addClass('show-children');
+      $(this).find('.navlinks-parent').attr('aria-expanded', 'true');
+    });
+
+    $('#main-navbar').on('focusout', '.navlinks-container', function() {
+      var container = $(this);
+      setTimeout(function() {
+        if (!container.find(':focus').length) {
+          container.removeClass('show-children');
+          container.find('.navlinks-parent').attr('aria-expanded', 'false');
+        }
+      }, 0);
     });
 
     // Ensure nested navbar menus are not longer than the menu header
