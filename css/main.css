@@ -652,8 +652,16 @@ img {
   position: relative;
 }
 
+.navbar-custom .nav .navlinks-parent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .navbar-custom .nav .navlinks-parent:after {
-  content: " \25BC";
+  content: " \25BE";
+  font-size: 10px;
+  opacity: 0.7;
 }
 
 .navbar-custom .nav .navlinks-children {
@@ -669,48 +677,82 @@ img {
   padding: 10px 18px;
   background-color: {{ site.navbar-children-col }};
   text-decoration: none !important;
-  border-width: 0 1px 1px 1px;
-  font-weight: normal;
+  border-width: 0;
+  font-weight: 500;
   white-space: nowrap;
-  transition: background var(--transition);
+  transition: background var(--transition), padding-left var(--transition);
 }
 
 .navbar-custom .nav .navlinks-container .navlinks-children a:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.1);
+  padding-left: 22px;
 }
 
 .navbar-custom .nav .navlinks-container .navlinks-children a .fa {
-  width: 16px;
+  width: 18px;
   text-align: center;
   flex-shrink: 0;
+  font-size: 15px;
+  opacity: 0.85;
 }
 
+/* Mobile: expand inline */
 @media only screen and (max-width: 767px) {
   .navbar-custom .nav .navlinks-container.show-children {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
   }
   .navbar-custom .nav .navlinks-container.show-children .navlinks-children {
     display: block;
   }
+  .navbar-custom .nav .navlinks-container.show-children .navlinks-parent {
+    color: #fff;
+  }
+  .navbar-custom .nav .navlinks-container .navlinks-children a {
+    padding-left: 28px;
+    font-size: 12px;
+  }
+  .navbar-custom .nav .navlinks-container .navlinks-children a:hover {
+    padding-left: 34px;
+  }
 }
 
+/* Desktop: floating dropdown */
 @media only screen and (min-width: 768px) {
   .navbar-custom .nav .navlinks-container {
     text-align: center;
   }
   .navbar-custom .nav .navlinks-container:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 4px;
+  }
+  .navbar-custom .nav .navlinks-container:hover .navlinks-parent {
+    color: #fff;
   }
   .navbar-custom .nav .navlinks-container:hover .navlinks-children {
     display: block;
   }
   .navbar-custom .nav .navlinks-children {
     position: absolute;
+    right: 0;
+    top: 100%;
+    min-width: 190px;
+    background-color: #1a2840;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    z-index: 1050;
   }
   .navbar-custom .nav .navlinks-container .navlinks-children a {
-    padding: 10px 18px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-width: 0 1px 1px;
+    padding: 11px 18px;
+    border: none;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+  .navbar-custom .nav .navlinks-container .navlinks-children a:last-child {
+    border-radius: 0 0 8px 8px;
   }
 }
 
@@ -1356,24 +1398,45 @@ td.gutter {
   border-color: #742A2A;
 }
 
-/* Dark mode toggle button */
-#dark-mode-toggle {
-  background: none;
-  border: none;
+/* Dark mode toggle button — shared styles */
+.dark-mode-toggle {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 20px;
   cursor: pointer;
   color: var(--color-navbar-text);
-  font-size: 16px;
-  padding: 10px 12px;
+  font-size: 14px;
+  padding: 5px 13px;
   line-height: 20px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  transition: color var(--transition), opacity var(--transition);
-  opacity: 0.85;
+  gap: 5px;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
 }
 
-#dark-mode-toggle:hover {
+.dark-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
   color: #fff;
-  opacity: 1;
+}
+
+/* Mobile-only dark mode toggle (in navbar-header) */
+.navbar-dark-mobile {
+  float: right;
+  margin: 9px 6px 9px 0;
+  /* visible on mobile by default */
+}
+
+/* Hide mobile toggle on desktop; both toggles share .dark-mode-toggle styles */
+@media (min-width: 768px) {
+  .navbar-dark-mobile {
+    display: none;
+  }
+}
+
+/* Desktop dark mode toggle in navbar-right li */
+#dark-mode-toggle {
+  margin: 13px 0 13px 4px;
 }
 
 /* --- Fix table border for gist snippets --- */
