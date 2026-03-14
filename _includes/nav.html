@@ -7,10 +7,6 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <!-- Mobile-only dark mode toggle (always visible, left of hamburger) -->
-      <button class="dark-mode-toggle navbar-dark-mobile" aria-label="Toggle dark mode" title="Toggle dark mode">
-        <span class="fa fa-moon-o" aria-hidden="true"></span>
-      </button>
       {% if site.title-img %}
         <a class="navbar-brand navbar-brand-logo" href="{{ site.url }}"><img src="{{ site.title-img }}"/></a>
       {% else %}
@@ -21,9 +17,7 @@
     <div class="collapse navbar-collapse" id="main-navbar">
       <ul class="nav navbar-nav navbar-right">
         <li class="navlinks-container">
-          <a class="navlinks-parent" href="javascript:void(0)">
-            <i class="fa fa-share-alt" aria-hidden="true"></i> Connect
-          </a>
+          <a class="navlinks-parent" href="javascript:void(0)">Connect</a>
           <div class="navlinks-children">
             {%- for link in site.social-network-links -%}
             {%- assign curkey = link[0] -%}
@@ -44,9 +38,8 @@
             {%- endfor -%}
           </div>
         </li>
-        <!-- Desktop dark mode toggle (inside collapse) -->
         <li>
-          <button id="dark-mode-toggle" class="dark-mode-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <button id="dark-mode-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
             <span class="fa fa-moon-o" aria-hidden="true"></span>
           </button>
         </li>
