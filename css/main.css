@@ -557,53 +557,6 @@ img {
   font-weight: 600;
 }
 
-
-.navbar-custom .nav li .nav-action-btn {
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--color-navbar-text);
-  border-radius: 999px;
-  font-size: 11px;
-  letter-spacing: 1.1px;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 8px 12px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: background-color var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
-}
-
-.navbar-custom .nav li .nav-action-btn:hover,
-.navbar-custom .nav li .nav-action-btn:focus {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.35);
-  outline: none;
-}
-
-.navbar-custom .nav li .nav-action-btn:focus-visible {
-  box-shadow: 0 0 0 2px rgba(126, 200, 227, 0.35);
-}
-
-.navbar-custom .nav .navlinks-container.show-children > .nav-action-btn,
-.navbar-custom .nav .navlinks-container:hover > .nav-action-btn {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.35);
-}
-
-.navbar-custom .nav .navlinks-parent .fa-angle-down {
-  font-size: 14px;
-  transition: transform var(--transition);
-}
-
-.navbar-custom .nav .navlinks-container.show-children .navlinks-parent .fa-angle-down,
-.navbar-custom .nav .navlinks-container:hover .navlinks-parent .fa-angle-down {
-  transform: rotate(180deg);
-}
-
 .navbar-custom .navbar-brand,
 .navbar-custom .nav li a {
   font-weight: 700;
@@ -697,6 +650,10 @@ img {
 /* Multi-level nav */
 .navbar-custom .nav .navlinks-container {
   position: relative;
+}
+
+.navbar-custom .nav .navlinks-parent:after {
+  content: " \25BC";
 }
 
 .navbar-custom .nav .navlinks-children {
@@ -1401,41 +1358,22 @@ td.gutter {
 
 /* Dark mode toggle button */
 #dark-mode-toggle {
+  background: none;
+  border: none;
   cursor: pointer;
+  color: var(--color-navbar-text);
+  font-size: 16px;
+  padding: 10px 12px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition), opacity var(--transition);
+  opacity: 0.85;
 }
 
-#dark-mode-toggle .fa {
-  font-size: 14px;
-}
-
-.dark-mode-label {
-  letter-spacing: 1px;
-}
-
-@media only screen and (max-width: 767px) {
-  .navbar-custom .nav li {
-    margin: 6px 0;
-  }
-
-  .navbar-custom .nav li .nav-action-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 11px 14px;
-  }
-
-  .dark-mode-label {
-    display: inline;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  #dark-mode-toggle {
-    margin-left: 8px;
-  }
-
-  .dark-mode-label {
-    display: none;
-  }
+#dark-mode-toggle:hover {
+  color: #fff;
+  opacity: 1;
 }
 
 /* --- Fix table border for gist snippets --- */
