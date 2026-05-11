@@ -92,48 +92,41 @@ layout: null
   color: #fff;
 }
 
-.hero-cta {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
+.hero-contact {
+  margin: 0;
+  font-size: 15px;
 }
 
-.btn-hero {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 26px;
-  border-radius: 6px;
+.hero-contact a {
+  color: #7EC8E3;
+  text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
-  text-decoration: none !important;
-  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  letter-spacing: 0.3px;
+  border-bottom: 1px solid rgba(126, 200, 227, 0.4);
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-.btn-hero-primary {
-  background-color: #4A7FA5;
-  color: #fff !important;
-  box-shadow: 0 2px 8px rgba(74, 127, 165, 0.35);
+.hero-contact a:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
-.btn-hero-primary:hover {
-  background-color: #2B6CB0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(74, 127, 165, 0.5);
+/* --- What I Do Section --- */
+
+.what-i-do-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: 48px;
+  margin-bottom: 52px;
 }
 
-.btn-hero-secondary {
-  background-color: transparent;
-  color: #E2E8F0 !important;
-  border: 1.5px solid rgba(226, 232, 240, 0.35);
+.what-i-do-body {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin-bottom: 16px;
 }
 
-.btn-hero-secondary:hover {
-  border-color: rgba(226, 232, 240, 0.75);
-  background-color: rgba(255, 255, 255, 0.06);
-  transform: translateY(-2px);
+.what-i-do-body:last-child {
+  margin-bottom: 0;
 }
 
 /* --- Home body spacing --- */
