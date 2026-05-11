@@ -1,28 +1,21 @@
 ---
 layout: home
 title: Pedro Borges Torres
-subtitle: "Software Engineer & Entrepreneur. MS CS from UCLA specializing in AI, LLMs, and cloud systems. Co-founder of Dynacloud."
+subtitle: "ML Engineer at Nirvana · MS CS from UCLA · Ex-IBM · Co-founder of Dynacloud. Building intelligent systems across the full ML stack — from classical models to LLMs and agentic AI."
+meta-description: "ML Engineer at Nirvana. MS CS from UCLA · Ex-IBM · Co-founder of Dynacloud. Building intelligent systems across the full ML stack — from classical models to LLMs and agentic AI."
 ---
 
 <!-- Hero -->
 <section class="hero-section">
     <div class="hero-inner">
-        <p class="hero-eyebrow">Hi, I'm</p>
         <h1 class="hero-name">Pedro Borges Torres</h1>
-        <p class="hero-tagline">Software Engineer &amp; Entrepreneur</p>
+        <p class="hero-tagline">ML Engineer at Nirvana. MS CS from UCLA. Ex-IBM. Co-founder of <a href="https://dynacloud.io/">Dynacloud</a>.</p>
         <p class="hero-bio">
-            MS in Computer Science from UCLA, specializing in AI. Ex-IBM. Co-founder of
-            <a href="https://dynacloud.io/">Dynacloud</a>.
-            Building intelligent systems at the intersection of AI, cloud, and product.
+            I build intelligent systems across the full ML stack — from classical models and
+            model training to LLMs, agentic workflows, and production AI systems.
+            Occasionally take on select consulting projects.
         </p>
-        <div class="hero-cta">
-            <a href="https://www.linkedin.com/in/pedrohbtp" class="btn-hero btn-hero-primary">
-                <i class="fa fa-linkedin"></i> LinkedIn
-            </a>
-            <a href="https://github.com/pedrohbtp" class="btn-hero btn-hero-secondary">
-                <i class="fa fa-github"></i> GitHub
-            </a>
-        </div>
+        <p class="hero-contact"><a href="https://www.linkedin.com/in/pedrohbtp">LinkedIn</a></p>
     </div>
 </section>
 
@@ -40,6 +33,26 @@ subtitle: "Software Engineer & Entrepreneur. MS CS from UCLA specializing in AI,
                 <span class="skill-pill">Cloud</span>
                 <span class="skill-pill">Backend</span>
                 <span class="skill-pill">Machine Learning</span>
+            </div>
+
+            <!-- What I Do -->
+            <div class="what-i-do-section">
+                <h2 class="section-heading">What I Do</h2>
+                <p class="what-i-do-body">
+                    I work across the full ML and AI stack — building production ML systems, training
+                    and fine-tuning models, and designing agentic AI workflows that automate real
+                    operational problems.
+                </p>
+                <p class="what-i-do-body">
+                    Unlike most "AI engineers" who work exclusively with off-the-shelf LLM APIs, I bring
+                    genuine ML depth: model architecture, training pipelines, classical ML where it
+                    outperforms LLMs, and the judgment to know which approach fits the problem.
+                </p>
+                <p class="what-i-do-body">
+                    I work remotely with US-based companies on a select basis alongside my full-time work.
+                    If you're working on something relevant, feel free to reach out on
+                    <a href="https://www.linkedin.com/in/pedrohbtp">LinkedIn</a>.
+                </p>
             </div>
 
             <!-- Media -->
@@ -188,7 +201,7 @@ subtitle: "Software Engineer & Entrepreneur. MS CS from UCLA specializing in AI,
                         <img src="./img/joystick.png" class="item-img" alt="Snake game icon">
                     </a>
                     <h3 class="item-name">snake-reinforcement-learning</h3>
-                    <div class="item-desc">Live demo of a trained RL agent playing a simplified version of the classic Snake game.</div>
+                    <div class="item-desc">A trained reinforcement learning agent playing Snake — demonstrating policy learning, reward shaping, and the gap between supervised and RL-based approaches to sequential decision problems.</div>
                     <div class="item-tags">
                         <span class="item-tag">Reinforcement Learning</span>
                         <span class="item-tag">Python</span>
@@ -224,7 +237,7 @@ subtitle: "Software Engineer & Entrepreneur. MS CS from UCLA specializing in AI,
                         <img src="./img/deduzai.png" class="item-img" alt="deduz.ai logo">
                     </a>
                     <h3 class="item-name">deduz.ai</h3>
-                    <div class="item-desc">AI assistant using LLMs to help answer questions about filing taxes in Brazil.</div>
+                    <div class="item-desc">Built and launched an LLM-powered tax assistant that helps Brazilians navigate the country's complex tax filing process — reducing what typically takes hours to minutes. Covered by Exame, one of Brazil's leading business publications.</div>
                     <div class="item-tags">
                         <span class="item-tag">LLMs</span>
                         <span class="item-tag">Python</span>
@@ -243,11 +256,31 @@ subtitle: "Software Engineer & Entrepreneur. MS CS from UCLA specializing in AI,
                 </div>
 
                 <div class="list-circles-item">
+                    <a href="https://avisa-ai.vercel.app">
+                        <img src="./img/avisaai.svg" class="item-img" alt="AvisaAi logo">
+                    </a>
+                    <h3 class="item-name"><a href="https://avisa-ai.vercel.app">AvisaAi</a></h3>
+                    <div class="item-desc">Built and launched a WhatsApp-native back-in-stock notification product for Brazilian micro-boutiques that sell via Instagram and WhatsApp. Handles customer waitlists, automated alerts, and payment integration end-to-end. Currently live with real users.</div>
+                    <div class="item-tags">
+                        <span class="item-tag">WhatsApp API</span>
+                        <span class="item-tag">Next.js</span>
+                        <span class="item-tag">Supabase</span>
+                        <span class="item-tag">Stripe</span>
+                        <span class="item-tag">LLMs</span>
+                    </div>
+                    <div class="item-links">
+                        <a class="item-link" href="https://avisa-ai.vercel.app" title="Website">
+                            <span class="fa fa-home"></span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="list-circles-item">
                     <a href="https://github.com/pedrohbtp/pytorch-zappa-serverless">
                         <img src="./img/pytorch-logo.png" class="item-img" alt="PyTorch logo">
                     </a>
                     <h3 class="item-name">pytorch-zappa-serverless</h3>
-                    <div class="item-desc">Deploy a PyTorch model to AWS Lambda using Zappa — serverless ML inference.</div>
+                    <div class="item-desc">Serverless ML inference pipeline — deploying a PyTorch model to AWS Lambda with zero provisioned infrastructure, scaling automatically with demand. An example of classical ML meeting modern cloud architecture.</div>
                     <div class="item-tags">
                         <span class="item-tag">PyTorch</span>
                         <span class="item-tag">AWS Lambda</span>
@@ -304,7 +337,7 @@ subtitle: "Software Engineer & Entrepreneur. MS CS from UCLA specializing in AI,
 
             <!-- Consulting CTA -->
             <div class="contact-cta">
-                <p>Interested in working together? Get in touch on
+                <p>Working on an ML or AI problem? Reach out on
                     <a href="https://www.linkedin.com/in/pedrohbtp">LinkedIn</a>.
                 </p>
             </div>
